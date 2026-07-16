@@ -14,8 +14,8 @@ export default defineConfig({
         name: 'Budget for Today',
         short_name: 'Budget',
         description: 'Your daily spending challenge, ₱50–₱150.',
-        theme_color: '#ECE7DA',
-        background_color: '#ECE7DA',
+        theme_color: '#102A54',
+        background_color: '#102A54',
         display: 'standalone',
         start_url: '/',
         icons: [
@@ -38,7 +38,30 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,woff2,png,svg,ico}'],
+        globPatterns: ['**/*.{js,css,html,woff2,png,svg,ico,mp3}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-stylesheets',
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-webfonts',
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
       },
     }),
   ],
