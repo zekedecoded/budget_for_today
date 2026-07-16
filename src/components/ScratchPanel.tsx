@@ -34,19 +34,13 @@ export function ScratchPanel({ amount, phase, onScratch }: ScratchPanelProps) {
     >
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 flex items-baseline justify-center gap-1"
+        className="pointer-events-none absolute inset-0 flex items-center justify-center"
       >
         <span
-          className="text-[30px] font-bold leading-none"
-          style={{ fontFamily: 'var(--font-body)', color: 'var(--gold)' }}
+          className="text-[54px] leading-none tracking-tight"
+          style={{ fontFamily: 'var(--font-amount)', color: 'var(--gold)' }}
         >
-          ₱
-        </span>
-        <span
-          className="text-[46px] leading-none tracking-tight"
-          style={{ fontFamily: 'var(--font-display-shade)', color: 'var(--gold)' }}
-        >
-          {amount}
+          ₱{amount}
         </span>
       </span>
 

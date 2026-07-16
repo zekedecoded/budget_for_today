@@ -14,8 +14,8 @@ export default defineConfig({
         name: 'Budget for Today',
         short_name: 'Budget',
         description: 'Your daily spending challenge, ₱50–₱150.',
-        theme_color: '#102A54',
-        background_color: '#102A54',
+        theme_color: '#0D3B2E',
+        background_color: '#0D3B2E',
         display: 'standalone',
         start_url: '/',
         icons: [
