@@ -1,0 +1,52 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: #ECE7DA;
+  --ink: #232019;
+  --peso: #1F5C3D;
+  --stamp: #B33A3A;
+}
+html, body, #root { height: 100%; }
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.paper-grain {
+  background-image:
+    radial-gradient(rgba(35, 32, 25, 0.035) 1px, transparent 1px),
+    radial-gradient(rgba(35, 32, 25, 0.02) 1px, transparent 1px);
+  background-size: 3px 3px, 7px 7px;
+  background-position: 0 0, 1px 2px;
+}
+.receipt-edge {
+  height: 12px;
+  background-color: var(--paper);
+  --zig: 12px;
+}
+.receipt-edge-top {
+  -webkit-mask: linear-gradient(-135deg, #000 6px, transparent 0) 0 6px / var(--zig) var(--zig) repeat-x,
+    linear-gradient(135deg, #000 6px, transparent 0) 0 6px / var(--zig) var(--zig) repeat-x;
+  mask: linear-gradient(-135deg, #000 6px, transparent 0) 0 6px / var(--zig) var(--zig) repeat-x,
+    linear-gradient(135deg, #000 6px, transparent 0) 0 6px / var(--zig) var(--zig) repeat-x;
+}
+.receipt-edge-bottom {
+  -webkit-mask: linear-gradient(-45deg, #000 6px, transparent 0) 0 0 / var(--zig) var(--zig) repeat-x,
+    linear-gradient(45deg, #000 6px, transparent 0) 0 0 / var(--zig) var(--zig) repeat-x;
+  mask: linear-gradient(-45deg, #000 6px, transparent 0) 0 0 / var(--zig) var(--zig) repeat-x,
+    linear-gradient(45deg, #000 6px, transparent 0) 0 0 / var(--zig) var(--zig) repeat-x;
+}
+@keyframes caret-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+.print-caret { animation: caret-blink 0.7s steps(1) infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .print-caret { animation: none; }
+}
