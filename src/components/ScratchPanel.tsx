@@ -30,7 +30,7 @@ export function ScratchPanel({ amount, phase, onScratch }: ScratchPanelProps) {
           ? "Scratch to reveal today's spending challenge"
           : `Today's spending challenge: ₱${amount}`
       }
-      className="relative block h-[104px] w-full overflow-hidden rounded-xl bg-[var(--bg)] shadow-[inset_0_2px_6px_rgba(0,0,0,0.4)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ticket)] disabled:cursor-default"
+      className="relative block h-[104px] w-full overflow-hidden rounded-xl bg-[var(--ink)] shadow-[inset_0_2px_6px_rgba(0,0,0,0.4)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ticket)] disabled:cursor-default"
     >
       <span
         aria-hidden="true"
