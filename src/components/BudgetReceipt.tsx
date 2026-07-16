@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faStamp, faPrint, faArrowRotateRight } from '@fortawesome/free-solid-svg-icons'
 import { BarcodeStripe } from './BarcodeStripe'
 
 function formatReceiptDate(d: Date): string {
@@ -61,6 +63,8 @@ export function BudgetReceipt() {
   }, [phase, fullText, clearTimers])
 
   const showCaret = phase === 'printing'
+  const pesoPrinted = printed.length >= 1
+  const digitsPrinted = printed.slice(1)
 
   return (
     <main className="flex min-h-full w-full items-center justify-center px-4 py-8">
@@ -68,34 +72,50 @@ export function BudgetReceipt() {
         <div className="receipt-edge receipt-edge-top" aria-hidden="true" />
         <div className="paper-grain bg-[var(--paper)] px-6 pb-7 pt-6 shadow-[0_18px_40px_-24px_rgba(35,32,25,0.55)]">
           <header className="text-center">
-            <h1 className="text-[15px] font-bold uppercase tracking-[0.22em]" style={{ fontFamily: "'Space Mono', monospace" }}>
+            <h1 className="text-[15px] font-bold uppercase tracking-[0.22em]" style={{ fontFamily: 'var(--font-body)' }}>
               Budget&nbsp;for&nbsp;Today
             </h1>
-            <p className="mt-2 text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/70" style={{ fontFamily: "'Space Mono', monospace" }}>
+            <p className="mt-2 text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/70" style={{ fontFamily: 'var(--font-body)' }}>
               {formatReceiptDate(now)}
             </p>
           </header>
 
           <Divider />
 
-          <p className="text-center text-[11px] uppercase tracking-[0.2em] text-[var(--ink)]/60" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>
+          <p className="text-center text-[11px] uppercase tracking-[0.2em] text-[var(--ink)]/60" style={{ fontFamily: 'var(--font-body)' }}>
             Today&apos;s Spending Challenge
           </p>
 
-          <div aria-live="polite" aria-atomic="true" className="flex min-h-[76px] items-center justify-center py-4">
-            <span
-              className="text-[56px] font-bold leading-none tracking-tight tabular-nums"
-              style={{ fontFamily: "'Space Mono', monospace", color: phase === 'idle' ? 'transparent' : 'var(--peso)' }}
-            >
-              {phase === 'idle' ? (
-                <span className="text-[var(--ink)]/25" aria-hidden="true">₱— —</span>
-              ) : (
-                <>
-                  {printed}
-                  {showCaret && <span className="print-caret ml-0.5 inline-block" aria-hidden="true">▌</span>}
-                </>
-              )}
-            </span>
+          <div aria-live="polite" aria-atomic="true" className="flex min-h-[76px] items-baseline justify-center gap-1 py-4">
+            {phase === 'idle' ? (
+              <span
+                className="text-[56px] font-bold leading-none tracking-tight text-[var(--ink)]/25"
+                style={{ fontFamily: 'var(--font-body)' }}
+                aria-hidden="true"
+              >
+                ₱— —
+              </span>
+            ) : (
+              <>
+                <span
+                  className="text-[38px] font-bold leading-none"
+                  style={{ fontFamily: 'var(--font-body)', color: 'var(--peso)' }}
+                >
+                  {pesoPrinted ? '₱' : ''}
+                </span>
+                <span
+                  className="text-[56px] font-bold leading-none tracking-tight tabular-nums"
+                  style={{ fontFamily: 'var(--font-display)', color: 'var(--peso)', fontVariationSettings: "'wght' 900" }}
+                >
+                  {digitsPrinted}
+                  {showCaret && (
+                    <span className="print-caret ml-0.5 inline-block" style={{ fontFamily: 'var(--font-body)' }} aria-hidden="true">
+                      ▌
+                    </span>
+                  )}
+                </span>
+              </>
+            )}
           </div>
 
           <Divider />
@@ -105,20 +125,28 @@ export function BudgetReceipt() {
             onClick={reveal}
             disabled={phase === 'printing'}
             className="w-full border-2 border-[var(--ink)] bg-[var(--ink)] px-4 py-3 text-[13px] font-bold uppercase tracking-[0.18em] text-[var(--paper)] transition-colors hover:bg-transparent hover:text-[var(--ink)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--stamp)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--paper)] disabled:cursor-not-allowed disabled:opacity-60"
-            style={{ fontFamily: "'Space Mono', monospace" }}
+            style={{ fontFamily: 'var(--font-body)' }}
           >
-            {phase === 'done' ? "Reprint Today's Budget" : "Reveal Today's Budget"}
+            <span className="inline-flex items-center justify-center gap-2">
+              <FontAwesomeIcon icon={phase === 'done' ? faArrowRotateRight : faPrint} aria-hidden="true" />
+              {phase === 'done' ? "Reprint Today's Budget" : "Reveal Today's Budget"}
+            </span>
           </button>
 
-          <p className="mt-4 text-center text-[10px] uppercase tracking-[0.3em]" style={{ fontFamily: "'Space Mono', monospace", color: 'var(--stamp)' }}>
-            ✦ New challenge daily ✦
+          <p
+            className="mt-4 flex items-center justify-center gap-2 text-center text-[10px] uppercase tracking-[0.3em]"
+            style={{ fontFamily: 'var(--font-body)', color: 'var(--stamp)' }}
+          >
+            <FontAwesomeIcon icon={faStamp} className="-rotate-6" aria-hidden="true" />
+            New challenge daily
+            <FontAwesomeIcon icon={faStamp} className="rotate-6" aria-hidden="true" />
           </p>
 
           <div className="mt-5">
             <BarcodeStripe seed={dateKey(now)} />
           </div>
 
-          <p className="mt-3 text-center text-[10px] uppercase tracking-[0.16em] text-[var(--ink)]/70" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>
+          <p className="mt-3 text-center text-[10px] uppercase tracking-[0.16em] text-[var(--ink)]/70" style={{ fontFamily: 'var(--font-body)' }}>
             MIN ₱50 · MAX ₱150 · ONE PER DAY
           </p>
         </div>
