@@ -60,7 +60,7 @@ export function DailyLimitsBoard() {
           className="text-xs text-[var(--ink)]/50"
           style={{ fontFamily: 'var(--font-body)' }}
         >
-          No budgets set today yet.
+          No tickets scratched yet today.
         </p>
       ) : (
         <ul className="space-y-2">

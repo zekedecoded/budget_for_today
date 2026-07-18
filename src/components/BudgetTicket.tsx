@@ -8,6 +8,8 @@ import {
 import { ScratchPanel } from "./ScratchPanel";
 import { ConfettiBurst } from "./ConfettiBurst";
 import { BarcodeStripe } from "./BarcodeStripe";
+import { supabase } from "../lib/supabase";
+import { useAuth } from "../context/AuthContext";
 
 function formatTicketDate(d: Date): string {
   const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -35,11 +37,10 @@ function dayOfYear(d: Date): number {
   const diff = d.getTime() - start.getTime();
   return Math.floor(diff / 86400000);
 }
-function budgetForDate(d: Date): number {
-  const key = dateKey(d);
+function budgetForSeed(seed: string): number {
   let hash = 2166136261;
-  for (let i = 0; i < key.length; i++) {
-    hash ^= key.charCodeAt(i);
+  for (let i = 0; i < seed.length; i++) {
+    hash ^= seed.charCodeAt(i);
     hash = Math.imul(hash, 16777619);
   }
   const buckets = 11; // 50,60,...,150
@@ -59,11 +60,35 @@ const REVEAL_DURATION_MS = 900;
 type Phase = "idle" | "scratching" | "done";
 
 export function BudgetTicket() {
+  const { user } = useAuth();
   const [now] = useState(() => new Date());
-  const amount = budgetForDate(now);
+  const [savedAmount, setSavedAmount] = useState<number | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const timer = useRef<number | null>(null);
+  const posting = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Assigned at random per user per day; the date-only seed is the fallback for visitors.
+  const assignedAmount = user
+    ? budgetForSeed(`${user.id}:${dateKey(now)}`)
+    : budgetForSeed(dateKey(now));
+  const amount = savedAmount ?? assignedAmount;
+
+  useEffect(() => {
+    if (!user) {
+      setSavedAmount(null);
+      return;
+    }
+    supabase
+      .from("daily_limits")
+      .select("amount")
+      .eq("user_id", user.id)
+      .eq("date", dateKey(now))
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setSavedAmount(data.amount);
+      });
+  }, [user, now]);
 
   useEffect(
     () => () => {
@@ -72,9 +97,32 @@ export function BudgetTicket() {
     [],
   );
 
+  const postLimit = useCallback(async () => {
+    if (!user || savedAmount !== null || posting.current) return;
+    posting.current = true;
+    const { data } = await supabase
+      .from("daily_limits")
+      .select("amount")
+      .eq("user_id", user.id)
+      .eq("date", dateKey(now))
+      .maybeSingle();
+    if (data) {
+      setSavedAmount(data.amount);
+    } else {
+      const { error } = await supabase.from("daily_limits").insert({
+        user_id: user.id,
+        amount: assignedAmount,
+        date: dateKey(now),
+      });
+      if (!error) setSavedAmount(assignedAmount);
+    }
+    posting.current = false;
+  }, [user, savedAmount, assignedAmount, now]);
+
   const scratch = useCallback(() => {
     if (phase !== "idle") return;
     audioRef.current?.play().catch(() => {});
+    postLimit();
     if (prefersReducedMotion()) {
       setPhase("done");
       return;
@@ -84,7 +132,7 @@ export function BudgetTicket() {
       () => setPhase("done"),
       REVEAL_DURATION_MS,
     );
-  }, [phase]);
+  }, [phase, postLimit]);
 
   const scratchAgain = useCallback(() => {
     setPhase("idle");
