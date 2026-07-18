@@ -114,7 +114,11 @@ export function BudgetTicket() {
         amount: assignedAmount,
         date: dateKey(now),
       });
-      if (!error) setSavedAmount(assignedAmount);
+      if (error) {
+        console.error("Failed to post daily limit:", error.message);
+      } else {
+        setSavedAmount(assignedAmount);
+      }
     }
     posting.current = false;
   }, [user, savedAmount, assignedAmount, now]);

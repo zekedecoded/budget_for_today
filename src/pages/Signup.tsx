@@ -17,30 +17,16 @@ export function Signup() {
     setError('')
     setLoading(true)
 
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    const { error: authError } = await supabase.auth.signUp({
       email,
       password,
+      options: { data: { username } },
     })
 
     if (authError) {
       setError(authError.message)
       setLoading(false)
       return
-    }
-
-    const user = authData.user
-    if (user) {
-      const { error: profileError } = await supabase.from('profiles').insert({
-        id: user.id,
-        username,
-        display_name: username,
-      })
-
-      if (profileError) {
-        setError(profileError.message)
-        setLoading(false)
-        return
-      }
     }
 
     setLoading(false)

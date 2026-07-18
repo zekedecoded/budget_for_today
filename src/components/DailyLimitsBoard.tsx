@@ -13,11 +13,12 @@ export function DailyLimitsBoard() {
 
   const fetchLimits = async () => {
     setLoading(true)
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('daily_limits')
       .select('*, profiles(username, display_name)')
       .eq('date', todayKey())
       .order('created_at', { ascending: false })
+    if (error) console.error('Failed to load today\'s budgets:', error.message)
     if (data) setLimits(data)
     setLoading(false)
   }
