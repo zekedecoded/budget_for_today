@@ -12,6 +12,7 @@ export function DailyLimitsBoard() {
   const [loading, setLoading] = useState(true)
 
   const fetchLimits = async () => {
+    if (!supabase) { setLoading(false); return }
     setLoading(true)
     const { data } = await supabase
       .from('daily_limits')
@@ -24,6 +25,7 @@ export function DailyLimitsBoard() {
 
   useEffect(() => {
     fetchLimits()
+    if (!supabase) return
 
     const channel = supabase
       .channel('daily_limits_changes')

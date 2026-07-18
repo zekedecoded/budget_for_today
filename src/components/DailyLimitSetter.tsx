@@ -18,7 +18,7 @@ export function DailyLimitSetter({ onSaved }: { onSaved?: () => void }) {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (!user) return
+    if (!user || !supabase) return
     supabase
       .from('daily_limits')
       .select('*')
@@ -36,7 +36,7 @@ export function DailyLimitSetter({ onSaved }: { onSaved?: () => void }) {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!user || !amount) return
+    if (!user || !supabase || !amount) return
     setSaving(true)
 
     const parsed = Number(amount)

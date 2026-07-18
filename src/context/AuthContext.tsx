@@ -19,6 +19,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   const fetchProfile = async (userId: string) => {
+    if (!supabase) return
     const { data } = await supabase
       .from('profiles')
       .select('*')
@@ -28,6 +29,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    if (!supabase) {
+      setLoading(false)
+      return
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       const u = session?.user ?? null
       setUser(u)
@@ -46,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signOut = async () => {
+    if (!supabase) return
     await supabase.auth.signOut()
     setUser(null)
     setProfile(null)
