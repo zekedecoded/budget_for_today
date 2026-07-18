@@ -35,7 +35,7 @@ export function DailyLimitsBoard() {
       )
       .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
+    return () => { supabase?.removeChannel(channel) }
   }, [])
 
   const displayName = (l: DailyLimit) =>

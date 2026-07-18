@@ -16,6 +16,12 @@ export function Login() {
     setError('')
     setLoading(true)
 
+    if (!supabase) {
+      setError('Supabase not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
+      setLoading(false)
+      return
+    }
+
     const { error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
