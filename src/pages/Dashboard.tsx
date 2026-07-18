@@ -10,6 +10,7 @@ export function Dashboard() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
+
       <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">
         <div className="w-full max-w-[340px] shrink-0">
           <BudgetTicket />
