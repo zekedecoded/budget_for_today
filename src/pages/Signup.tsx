@@ -3,10 +3,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUserPlus, faTicket } from '@fortawesome/free-solid-svg-icons'
 import { supabase } from '../lib/supabase'
+import { USERNAME_RE, USERNAME_RULES, usernameToEmail } from '../lib/usernameAuth'
 
 export function Signup() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
   const [error, setError] = useState('')
@@ -15,16 +15,27 @@ export function Signup() {
   const handleSignup = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
+
+    const name = username.trim()
+    if (!USERNAME_RE.test(name)) {
+      setError(USERNAME_RULES)
+      return
+    }
+
     setLoading(true)
 
     const { error: authError } = await supabase.auth.signUp({
-      email,
+      email: usernameToEmail(name),
       password,
-      options: { data: { username } },
+      options: { data: { username: name } },
     })
 
     if (authError) {
-      setError(authError.message)
+      setError(
+        authError.message.toLowerCase().includes('already registered')
+          ? 'That username is already taken.'
+          : authError.message,
+      )
       setLoading(false)
       return
     }
@@ -75,26 +86,13 @@ export function Signup() {
             <input
               type="text"
               required
+              minLength={3}
+              maxLength={20}
+              autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded-lg border border-[var(--ink)]/20 bg-white px-3 py-2 text-sm text-[var(--ink)] outline-none transition-colors focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold)]"
-              style={{ fontFamily: 'var(--font-body)' }}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-[var(--ink)]/60"
-              style={{ fontFamily: 'var(--font-body)' }}
-            >
-              Email
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-[var(--ink)]/20 bg-white px-3 py-2 text-sm text-[var(--ink)] outline-none transition-colors focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold)]"
+              placeholder="e.g. ezekiel"
+              className="w-full rounded-lg border border-[var(--ink)]/20 bg-white px-3 py-2 text-sm text-[var(--ink)] outline-none transition-colors placeholder:text-[var(--ink)]/30 focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold)]"
               style={{ fontFamily: 'var(--font-body)' }}
             />
           </div>

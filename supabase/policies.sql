@@ -29,6 +29,10 @@ drop policy if exists "daily_limits_insert_own" on public.daily_limits;
 create policy "daily_limits_insert_own" on public.daily_limits
   for insert with check (auth.uid() = user_id);
 
+-- Usernames must be unique (case-insensitive)
+create unique index if not exists profiles_username_unique
+  on public.profiles (lower(username));
+
 -- ── auto-create a profile whenever an account is created ─────────────────
 -- (the client-side insert fails when email confirmation is required,
 --  because there is no session yet at signup time)

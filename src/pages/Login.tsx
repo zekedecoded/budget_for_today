@@ -3,10 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faRightToBracket, faTicket } from '@fortawesome/free-solid-svg-icons'
 import { supabase } from '../lib/supabase'
+import { loginIdentifierToEmail } from '../lib/usernameAuth'
 
 export function Login() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -17,14 +18,18 @@ export function Login() {
     setLoading(true)
 
     const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
+      email: loginIdentifierToEmail(username),
       password,
     })
 
     setLoading(false)
 
     if (authError) {
-      setError(authError.message)
+      setError(
+        authError.message.toLowerCase().includes('invalid login credentials')
+          ? 'Wrong username or password.'
+          : authError.message,
+      )
       return
     }
 
@@ -68,13 +73,14 @@ export function Login() {
               className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-[var(--ink)]/60"
               style={{ fontFamily: 'var(--font-body)' }}
             >
-              Email
+              Username
             </label>
             <input
-              type="email"
+              type="text"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="w-full rounded-lg border border-[var(--ink)]/20 bg-white px-3 py-2 text-sm text-[var(--ink)] outline-none transition-colors focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold)]"
               style={{ fontFamily: 'var(--font-body)' }}
             />

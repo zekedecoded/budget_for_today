@@ -30,7 +30,7 @@ export function Navbar() {
               className="text-xs font-semibold text-[var(--ink)]/70"
               style={{ fontFamily: 'var(--font-body)' }}
             >
-              {profile?.username || user.email}
+              {profile?.username || user.email?.split('@')[0]}
             </span>
             <button
               type="button"
