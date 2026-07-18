@@ -1,6 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 
-export const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL || 'http://localhost:54321',
-  import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key',
-)
+const url = import.meta.env.VITE_SUPABASE_URL
+const key = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+if (typeof window !== 'undefined') {
+  console.log('[supabase] URL:', url || 'MISSING')
+  console.log('[supabase] KEY:', key ? `${key.slice(0, 8)}...` : 'MISSING')
+  console.log('[supabase] Using URL:', url || '(empty)')
+}
+
+export const supabase = createClient(url || '', key || '')
