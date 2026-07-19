@@ -17,6 +17,23 @@ export function Signup() {
     setError('')
 
     const name = username.trim()
+
+    if (name.includes('@')) {
+      const suggestion = name
+        .split('@')[0]
+        .replace(/[^a-zA-Z0-9_]/g, '')
+        .slice(0, 20)
+      if (USERNAME_RE.test(suggestion)) {
+        setUsername(suggestion)
+        setError(
+          `No email needed — you sign up with just a username. How about "${suggestion}"? Press Sign Up again to use it.`,
+        )
+      } else {
+        setError(`No email needed — you sign up with just a username. ${USERNAME_RULES}`)
+      }
+      return
+    }
+
     if (!USERNAME_RE.test(name)) {
       setError(USERNAME_RULES)
       return
@@ -87,7 +104,6 @@ export function Signup() {
               type="text"
               required
               minLength={3}
-              maxLength={20}
               autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -95,6 +111,12 @@ export function Signup() {
               className="w-full rounded-lg border border-[var(--ink)]/20 bg-white px-3 py-2 text-sm text-[var(--ink)] outline-none transition-colors placeholder:text-[var(--ink)]/30 focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold)]"
               style={{ fontFamily: 'var(--font-body)' }}
             />
+            <p
+              className="mt-1 text-[11px] text-[var(--ink)]/40"
+              style={{ fontFamily: 'var(--font-body)' }}
+            >
+              No email needed — 3-20 letters, numbers, or underscores.
+            </p>
           </div>
 
           <div className="mb-6">
