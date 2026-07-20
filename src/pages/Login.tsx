@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faRightToBracket, faTicket } from '@fortawesome/free-solid-svg-icons'
+import { faRightToBracket } from '@fortawesome/free-solid-svg-icons'
 import { supabase } from '../lib/supabase'
 import { loginIdentifierToEmail } from '../lib/usernameAuth'
 
@@ -16,23 +16,12 @@ export function Login() {
     e.preventDefault()
     setError('')
     setLoading(true)
-
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email: loginIdentifierToEmail(username),
-      password,
-    })
-
+    const { error: authError } = await supabase.auth.signInWithPassword({ email: loginIdentifierToEmail(username), password })
     setLoading(false)
-
     if (authError) {
-      setError(
-        authError.message.toLowerCase().includes('invalid login credentials')
-          ? 'Wrong username or password.'
-          : authError.message,
-      )
+      setError(authError.message.toLowerCase().includes('invalid login credentials') ? 'Wrong username or password.' : authError.message)
       return
     }
-
     navigate('/')
   }
 
@@ -40,92 +29,46 @@ export function Login() {
     <div className="flex min-h-full items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <FontAwesomeIcon
-            icon={faTicket}
-            className="mb-2 text-3xl text-[var(--gold)]"
-          />
-          <h1
-            className="text-xl font-bold uppercase tracking-wider text-[var(--ink)]"
-            style={{ fontFamily: 'var(--font-body)' }}
-          >
-            Welcome Back
+          <span className="pokeball pokeball-lg mx-auto mb-3 pokeball-pulse" aria-hidden="true" />
+          <h1 className="text-2xl font-bold uppercase tracking-wider text-white" style={{ fontFamily: 'var(--font-display)' }}>
+            Welcome Back, Trainer!
           </h1>
-          <p
-            className="mt-1 text-xs text-[var(--ink)]/50"
-            style={{ fontFamily: 'var(--font-body)' }}
-          >
-            Login to set your daily budget
+          <p className="mt-2 text-xs text-white/40">
+            Login to claim your daily drop
           </p>
         </div>
 
-        <form
-          onSubmit={handleLogin}
-          className="rounded-2xl border border-[var(--gold)]/20 bg-white/60 p-6 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.2)] backdrop-blur-xl"
-        >
+        <div className="auth-card">
           {error && (
-            <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600">
+            <div className="mb-4 rounded-lg bg-red-900/30 border border-red-500/30 px-3 py-2 text-xs font-semibold text-red-300">
               {error}
             </div>
           )}
 
-          <div className="mb-4">
-            <label
-              className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-[var(--ink)]/60"
-              style={{ fontFamily: 'var(--font-body)' }}
-            >
-              Username
-            </label>
-            <input
-              type="text"
-              required
-              autoComplete="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded-lg border border-[var(--ink)]/20 bg-white px-3 py-2 text-sm text-[var(--ink)] outline-none transition-colors focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold)]"
-              style={{ fontFamily: 'var(--font-body)' }}
-            />
-          </div>
+          <form onSubmit={handleLogin}>
+            <div className="mb-4">
+              <label className="game-label">Username</label>
+              <input type="text" required autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} className="game-input" />
+            </div>
 
-          <div className="mb-6">
-            <label
-              className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-[var(--ink)]/60"
-              style={{ fontFamily: 'var(--font-body)' }}
-            >
-              Password
-            </label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-[var(--ink)]/20 bg-white px-3 py-2 text-sm text-[var(--ink)] outline-none transition-colors focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold)]"
-              style={{ fontFamily: 'var(--font-body)' }}
-            />
-          </div>
+            <div className="mb-6">
+              <label className="game-label">Password</label>
+              <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="game-input" />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--gold)] px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-            style={{ fontFamily: 'var(--font-body)' }}
-          >
-            <FontAwesomeIcon icon={faRightToBracket} />
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
+            <button type="submit" disabled={loading} className="game-btn game-btn-primary w-full mb-4">
+              <FontAwesomeIcon icon={faRightToBracket} />
+              {loading ? 'Logging in...' : 'Login'}
+            </button>
+          </form>
 
-          <p
-            className="mt-4 text-center text-xs text-[var(--ink)]/50"
-            style={{ fontFamily: 'var(--font-body)' }}
-          >
+          <p className="text-center text-xs text-white/40">
             No account yet?{' '}
-            <Link
-              to="/signup"
-              className="font-bold text-[var(--gold)] no-underline hover:underline"
-            >
+            <Link to="/signup" className="font-bold text-[var(--pokemon-yellow)] no-underline hover:underline">
               Sign up
             </Link>
           </p>
-        </form>
+        </div>
       </div>
     </div>
   )

@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faRightFromBracket, faTicket, faUser } from '@fortawesome/free-solid-svg-icons'
+import { faRightFromBracket, faUser } from '@fortawesome/free-solid-svg-icons'
 import { useAuth } from '../context/AuthContext'
 import { getAvatarUrl } from '../lib/avatar'
 
@@ -14,65 +14,40 @@ export function Navbar() {
   }
 
   return (
-    <nav className="flex items-center justify-between border-b border-[var(--ink)]/10 bg-[var(--paper)]/80 px-4 py-3 backdrop-blur-sm">
-      <Link
-        to="/"
-        className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-[var(--ink)] no-underline"
-        style={{ fontFamily: 'var(--font-body)' }}
-      >
-        <FontAwesomeIcon icon={faTicket} className="text-[var(--gold)]" />
-        Budget for Today
+    <nav className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 bg-[#0A1832]/80 backdrop-blur-sm relative z-10">
+      <Link to="/" className="flex items-center gap-2 no-underline">
+        <span className="pokeball pokeball-sm" aria-hidden="true" />
+        <span className="text-xs font-bold uppercase tracking-wider text-white/90" style={{ fontFamily: 'var(--font-display)' }}>
+          Budget for Today
+        </span>
       </Link>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-1">
         {user ? (
           <>
-            <Link
-              to="/profile"
-              className="flex items-center gap-2 no-underline"
-            >
+            <Link to="/profile" className="flex items-center gap-2 nav-icon-btn">
               {profile?.avatar ? (
-                <img
-                  src={getAvatarUrl(profile.avatar)}
-                  alt="Avatar"
-                  className="h-7 w-7 rounded-full border-2 border-[var(--gold)] object-cover"
-                />
+                <img src={getAvatarUrl(profile.avatar)} alt="Avatar" className="h-6 w-6 rounded-full border border-white/20 object-cover" />
               ) : (
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--ink)]/10 text-xs text-[var(--ink)]/50">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/5 text-[10px] text-white/40">
                   <FontAwesomeIcon icon={faUser} />
                 </span>
               )}
-              <span
-                className="text-xs font-semibold text-[var(--ink)]/70"
-                style={{ fontFamily: 'var(--font-body)' }}
-              >
-                {profile?.display_name || profile?.username || user.email?.split('@')[0]}
+              <span className="hidden sm:inline text-xs font-semibold text-white/70 max-w-[80px] truncate">
+                {profile?.display_name || profile?.username || 'Trainer'}
               </span>
             </Link>
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-[var(--ink)]/60 transition-colors hover:text-[var(--ink)]"
-              style={{ fontFamily: 'var(--font-body)' }}
-            >
+            <button type="button" onClick={handleSignOut} className="nav-icon-btn">
               <FontAwesomeIcon icon={faRightFromBracket} />
-              Logout
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </>
         ) : (
-          <div className="flex items-center gap-2">
-            <Link
-              to="/login"
-              className="rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-[var(--ink)]/60 transition-colors hover:text-[var(--ink)] no-underline"
-              style={{ fontFamily: 'var(--font-body)' }}
-            >
+          <div className="flex items-center gap-1.5">
+            <Link to="/login" className="game-btn game-btn-ghost game-btn-sm">
               Login
             </Link>
-            <Link
-              to="/signup"
-              className="rounded-full border border-[var(--gold)] bg-[var(--gold)] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white no-underline transition-opacity hover:opacity-90"
-              style={{ fontFamily: 'var(--font-body)' }}
-            >
+            <Link to="/signup" className="game-btn game-btn-yellow game-btn-sm">
               Sign Up
             </Link>
           </div>
