@@ -85,7 +85,7 @@ export function Signup() {
 
         <form
           onSubmit={handleSignup}
-          className="rounded-2xl border border-[var(--ink)]/10 bg-[var(--ticket)] p-6 shadow-sm"
+          className="rounded-2xl border border-[var(--gold)]/20 bg-white/60 p-6 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.2)] backdrop-blur-xl"
         >
           {error && (
             <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600">

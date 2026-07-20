@@ -44,7 +44,7 @@ export function DailyLimitsBoard() {
     l.profiles?.display_name || l.profiles?.username || 'Anonymous'
 
   return (
-    <div className="rounded-2xl border border-[var(--ink)]/10 bg-[var(--ticket)] p-5 shadow-sm">
+    <div className="rounded-2xl border border-[var(--gold)]/20 bg-white/60 p-5 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.2)] backdrop-blur-xl">
       <h2
         className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--ink)]"
         style={{ fontFamily: 'var(--font-body)' }}

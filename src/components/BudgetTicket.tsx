@@ -155,7 +155,7 @@ export function BudgetTicket() {
         <span className="ticket-hole ticket-hole-left" aria-hidden="true" />
         <span className="ticket-hole ticket-hole-right" aria-hidden="true" />
 
-        <div className="ticket-grain rounded-2xl border-2 border-[var(--gold)] bg-[var(--ticket)] px-5 pb-6 pt-7 shadow-[0_20px_44px_-20px_rgba(0,0,0,0.55)]">
+        <div className="ticket-grain rounded-2xl border border-[var(--gold)]/30 bg-white/65 px-5 pb-6 pt-7 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.25),0_0_60px_rgba(201,146,46,0.06)] backdrop-blur-xl">
           <div
             className="flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/70"
             style={{ fontFamily: "var(--font-body)" }}
@@ -214,7 +214,7 @@ export function BudgetTicket() {
               <button
                 type="button"
                 onClick={scratchAgain}
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--ink)]/60 transition-colors hover:text-[var(--ink)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ticket)]"
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--ink)]/60 transition-colors hover:text-[var(--ink)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
                 style={{ fontFamily: "var(--font-body)" }}
               >
                 <FontAwesomeIcon icon={faArrowRotateRight} />

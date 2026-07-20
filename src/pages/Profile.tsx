@@ -63,7 +63,7 @@ export function Profile() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--ink)]/10 bg-[var(--ticket)] p-6 shadow-sm">
+        <div className="rounded-2xl border border-[var(--gold)]/20 bg-white/60 p-6 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.2)] backdrop-blur-xl">
           <div className="mb-6 flex justify-center">
             <div className="flex items-center gap-4">
               <img
