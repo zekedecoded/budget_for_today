@@ -13,7 +13,8 @@ function randBudget(): number {
 
 export function ScratchPanel({ amount, phase, onScratch, children }: ScratchPanelProps) {
   const [spinning, setSpinning] = useState(false)
-  const [display, setDisplay] = useState<number | null>(null)
+  const displayRef = useRef<HTMLSpanElement>(null)
+  const labelRef = useRef<HTMLSpanElement>(null)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
   const reducedMotion = useRef(
     typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false
@@ -31,10 +32,9 @@ export function ScratchPanel({ amount, phase, onScratch, children }: ScratchPane
     setSpinning(true)
 
     if (reducedMotion.current) {
-      setDisplay(amount)
+      if (displayRef.current) displayRef.current.textContent = '\u20B1' + amount
       const t = setTimeout(() => {
         setSpinning(false)
-        setDisplay(null)
         clear()
         onScratch()
       }, 200)
@@ -42,23 +42,26 @@ export function ScratchPanel({ amount, phase, onScratch, children }: ScratchPane
       return
     }
 
-    const delays = [60, 70, 80, 90, 110, 130, 170, 220]
+    const delays = [60, 90, 130, 200]
     let acc = 0
 
     for (const d of delays) {
       acc += d
-      const t = setTimeout(() => setDisplay(randBudget()), acc)
+      const t = setTimeout(() => {
+        if (displayRef.current) displayRef.current.textContent = '\u20B1' + randBudget()
+      }, acc)
       timers.current.push(t)
     }
 
     const settleDelay = acc + 180
-    const t1 = setTimeout(() => setDisplay(amount), settleDelay)
+    const t1 = setTimeout(() => {
+      if (displayRef.current) displayRef.current.textContent = '\u20B1' + amount
+    }, settleDelay)
     timers.current.push(t1)
 
     const doneDelay = settleDelay + 350
     const t2 = setTimeout(() => {
       setSpinning(false)
-      setDisplay(null)
       clear()
       onScratch()
     }, doneDelay)
@@ -71,7 +74,7 @@ export function ScratchPanel({ amount, phase, onScratch, children }: ScratchPane
         {children}
       </div>
 
-      <div className={`absolute inset-0 z-10 transition-all duration-[300ms] ease-in ${phase === 'done' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <div className={`absolute inset-0 z-10 transition-opacity duration-[300ms] ease-in ${phase === 'done' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div className="h-full w-full rounded-xl border border-white/10 bg-gradient-to-b from-[#0A1832] to-[#1A2D4A] overflow-hidden">
           <button
             type="button"
@@ -81,14 +84,15 @@ export function ScratchPanel({ amount, phase, onScratch, children }: ScratchPane
           >
             {spinning ? (
               <>
-                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40 mb-1">
+                <span ref={labelRef} className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40 mb-1">
                   Today&apos;s Trainers Budget
                 </span>
                 <span
+                  ref={displayRef}
                   className="text-[48px] leading-none tracking-tight text-[var(--pokemon-yellow)]"
                   style={{ fontFamily: 'var(--font-amount)' }}
                 >
-                  {'\u20B1'}{display}
+                  {'\u20B1'}{amount}
                 </span>
               </>
             ) : (
