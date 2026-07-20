@@ -4,12 +4,14 @@ import {
   faTicket,
   faCoins,
   faArrowRotateRight,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { ScratchPanel } from "./ScratchPanel";
 import { ConfettiBurst } from "./ConfettiBurst";
 import { BarcodeStripe } from "./BarcodeStripe";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
+import { getAvatarUrl } from "../lib/avatar";
 
 function formatTicketDate(d: Date): string {
   const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -60,7 +62,7 @@ const REVEAL_DURATION_MS = 900;
 type Phase = "idle" | "scratching" | "done";
 
 export function BudgetTicket() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [now] = useState(() => new Date());
   const [savedAmount, setSavedAmount] = useState<number | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
@@ -165,6 +167,22 @@ export function BudgetTicket() {
           <div className="ticket-perf my-4 -mx-5" aria-hidden="true" />
 
           <header className="text-center">
+            {user && profile?.avatar && (
+              <div className="mb-3 flex justify-center">
+                <img
+                  src={getAvatarUrl(profile.avatar)}
+                  alt="Avatar"
+                  className="h-10 w-10 rounded-full border-2 border-[var(--gold)] object-cover shadow-sm"
+                />
+              </div>
+            )}
+            {user && !profile?.avatar && (
+              <div className="mb-3 flex justify-center">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--ink)]/5 text-sm text-[var(--ink)]/40">
+                  <FontAwesomeIcon icon={faUser} />
+                </span>
+              </div>
+            )}
             <h1
               className="text-[22px] leading-none tracking-tight"
               style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}

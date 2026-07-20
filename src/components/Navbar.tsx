@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faRightFromBracket, faTicket } from '@fortawesome/free-solid-svg-icons'
+import { faRightFromBracket, faTicket, faUser } from '@fortawesome/free-solid-svg-icons'
 import { useAuth } from '../context/AuthContext'
+import { getAvatarUrl } from '../lib/avatar'
 
 export function Navbar() {
   const { user, profile, signOut } = useAuth()
@@ -26,12 +27,28 @@ export function Navbar() {
       <div className="flex items-center gap-4">
         {user ? (
           <>
-            <span
-              className="text-xs font-semibold text-[var(--ink)]/70"
-              style={{ fontFamily: 'var(--font-body)' }}
+            <Link
+              to="/profile"
+              className="flex items-center gap-2 no-underline"
             >
-              {profile?.username || user.email?.split('@')[0]}
-            </span>
+              {profile?.avatar ? (
+                <img
+                  src={getAvatarUrl(profile.avatar)}
+                  alt="Avatar"
+                  className="h-7 w-7 rounded-full border-2 border-[var(--gold)] object-cover"
+                />
+              ) : (
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--ink)]/10 text-xs text-[var(--ink)]/50">
+                  <FontAwesomeIcon icon={faUser} />
+                </span>
+              )}
+              <span
+                className="text-xs font-semibold text-[var(--ink)]/70"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                {profile?.display_name || profile?.username || user.email?.split('@')[0]}
+              </span>
+            </Link>
             <button
               type="button"
               onClick={handleSignOut}

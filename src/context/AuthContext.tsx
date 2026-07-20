@@ -2,16 +2,27 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import type { Profile } from '../types'
+import { getStoredAvatar, setStoredAvatar, clearStoredAvatar } from '../lib/avatar'
 
 interface AuthContextValue {
   user: User | null
   profile: Profile | null
   loading: boolean
   signOut: () => Promise<void>
+  updateProfile: (updates: Partial<Profile>) => Promise<void>
   refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
+
+function mergeAvatarFromStorage(serverProfile: Profile | null): Profile | null {
+  if (!serverProfile) return null
+  const stored = getStoredAvatar()
+  if (stored !== null && stored !== serverProfile.avatar) {
+    return { ...serverProfile, avatar: stored }
+  }
+  return serverProfile
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -25,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select('*')
       .eq('id', userId)
       .single()
-    setProfile(data)
+    setProfile(mergeAvatarFromStorage(data))
   }
 
   useEffect(() => {
@@ -40,7 +51,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const u = session?.user ?? null
       setUser(u)
       if (u) fetchProfile(u.id)
-      else setProfile(null)
+      else {
+        setProfile(null)
+        clearStoredAvatar()
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -51,6 +65,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut()
     setUser(null)
     setProfile(null)
+    clearStoredAvatar()
+  }
+
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!user) return
+    if (updates.avatar !== undefined && updates.avatar !== null) {
+      setStoredAvatar(updates.avatar)
+    }
+    setProfile(prev => prev ? { ...prev, ...updates } : prev)
+    const { error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', user.id)
+    if (error) {
+      console.error('Failed to sync profile to server:', error.message)
+    }
   }
 
   const refreshProfile = async () => {
@@ -58,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, profile, loading, signOut, updateProfile, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )

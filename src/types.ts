@@ -2,6 +2,7 @@ export interface Profile {
   id: string
   username: string
   display_name: string | null
+  avatar: number | null
   created_at: string
 }
 
@@ -13,5 +14,5 @@ export interface DailyLimit {
   note: string | null
   created_at: string
   updated_at: string
-  profiles?: Pick<Profile, 'username' | 'display_name'> | null
+  profiles?: Pick<Profile, 'username' | 'display_name' | 'avatar'> | null
 }

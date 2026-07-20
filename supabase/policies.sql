@@ -66,6 +66,10 @@ select u.id, split_part(u.email, '@', 1), split_part(u.email, '@', 1)
 from auth.users u
 where not exists (select 1 from public.profiles p where p.id = u.id);
 
+-- ── avatar column on profiles ────────────────────────────────────────────
+
+alter table public.profiles add column if not exists avatar integer;
+
 -- ── realtime: let the board update live when someone scratches ───────────
 
 do $$

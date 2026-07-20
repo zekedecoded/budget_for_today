@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faUser } from '@fortawesome/free-solid-svg-icons'
 import { supabase } from '../lib/supabase'
+import { getAvatarUrl } from '../lib/avatar'
 import type { DailyLimit } from '../types'
 
 function todayKey(): string {
@@ -15,7 +18,7 @@ export function DailyLimitsBoard() {
     setLoading(true)
     const { data, error } = await supabase
       .from('daily_limits')
-      .select('*, profiles(username, display_name)')
+      .select('*, profiles(username, display_name, avatar)')
       .eq('date', todayKey())
       .order('created_at', { ascending: false })
     if (error) console.error('Failed to load today\'s budgets:', error.message)
@@ -70,7 +73,18 @@ export function DailyLimitsBoard() {
               key={l.id}
               className="flex items-center justify-between rounded-lg border border-[var(--ink)]/5 bg-[var(--paper)] px-3 py-2"
             >
-              <div>
+              <div className="flex items-center gap-2.5">
+                {l.profiles?.avatar ? (
+                  <img
+                    src={getAvatarUrl(l.profiles.avatar)}
+                    alt=""
+                    className="h-7 w-7 rounded-full border border-[var(--gold)]/40 object-cover"
+                  />
+                ) : (
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--ink)]/5 text-[10px] text-[var(--ink)]/30">
+                    <FontAwesomeIcon icon={faUser} />
+                  </span>
+                )}
                 <span
                   className="text-sm font-bold text-[var(--ink)]"
                   style={{ fontFamily: 'var(--font-body)' }}
