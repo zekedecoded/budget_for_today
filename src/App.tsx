@@ -23,6 +23,7 @@ export default function App() {
             hueShift={0.8}
             bloom={0.5}
             transparent
+            suspendWhenOffscreen
           />
         </div>
         <div className="fixed inset-0 -z-[5] bg-gradient-to-b from-[#0A1832]/60 to-transparent pointer-events-none" />

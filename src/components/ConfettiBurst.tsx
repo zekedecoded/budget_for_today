@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 
 const COLORS = ['#FFDE00', '#3B4CCA', '#FF1C1C', '#FFFFFF', '#FFD700', '#5B6CDA']
-const PIECE_COUNT = 20
+const PIECE_COUNT = 8
 
 export function ConfettiBurst() {
   const pieces = useMemo(

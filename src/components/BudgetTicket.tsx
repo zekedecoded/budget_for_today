@@ -34,10 +34,6 @@ function budgetForSeed(seed: string): number {
   return 50 + ((hash >>> 0) % 11) * 10
 }
 
-function prefersReducedMotion(): boolean {
-  return typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-}
-
 function getRarity(amount: number): { label: string; icon: any; tier: string } {
   if (amount <= 70) return { label: 'STANDARD', icon: faStar, tier: 'standard' }
   if (amount <= 110) return { label: 'GREAT', icon: faBolt, tier: 'great' }
@@ -45,14 +41,11 @@ function getRarity(amount: number): { label: string; icon: any; tier: string } {
   return { label: 'LEGENDARY', icon: faGem, tier: 'legendary' }
 }
 
-const REVEAL_DURATION_MS = 600
-
 export function BudgetTicket() {
   const { user, profile } = useAuth()
   const [now] = useState(() => new Date())
   const [savedAmount, setSavedAmount] = useState<number | null>(null)
   const [phase, setPhase] = useState<'idle' | 'scratching' | 'done'>('idle')
-  const timer = useRef<number | null>(null)
   const posting = useRef(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
@@ -67,8 +60,6 @@ export function BudgetTicket() {
       if (data) setSavedAmount(data.amount)
     })
   }, [user, now])
-
-  useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current) }, [])
 
   const postLimit = useCallback(async () => {
     if (!user || savedAmount !== null || posting.current) return
@@ -85,19 +76,14 @@ export function BudgetTicket() {
     if (phase !== 'idle') return
     audioRef.current?.play().catch(() => {})
     postLimit()
-    if (prefersReducedMotion()) { setPhase('done'); return }
-    setPhase('scratching')
-    timer.current = window.setTimeout(() => setPhase('done'), REVEAL_DURATION_MS)
+    setPhase('done')
   }, [phase, postLimit])
 
   const scratchAgain = useCallback(() => { setPhase('idle') }, [])
 
   return (
     <section className="relative" aria-label="Today's budget challenge ticket">
-      <div className={'game-card holo-surface ' + (phase === 'done' ? 'rarity-' + rarity.tier : '')}>
-        {phase === 'scratching' && <div className="charge-glow" />}
-        {phase === 'scratching' && <div className="reveal-flash" />}
-
+      <div className={'game-card ' + (phase === 'done' ? 'rarity-' + rarity.tier : '')}>
         <div className="flex items-center justify-center gap-2 mb-2">
           <span className="pokeball pokeball-sm" aria-hidden="true" />
           <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">
@@ -124,7 +110,7 @@ export function BudgetTicket() {
                 <span className="amount-value">{amount}</span>
               </div>
 
-              <p className="amount-label">Today&apos;s Budget</p>
+              <p className="amount-label">Today&apos;s Trainers Budget</p>
               <p className="amount-date">{shortDate(now)}</p>
 
               {user && profile?.avatar && (
