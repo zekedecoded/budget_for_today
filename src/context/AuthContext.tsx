@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import type { Profile } from '../types'
-import { getStoredAvatar, setStoredAvatar, clearStoredAvatar } from '../lib/avatar'
 
 interface AuthContextValue {
   user: User | null
@@ -14,15 +13,6 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
-
-function mergeAvatarFromStorage(serverProfile: Profile | null): Profile | null {
-  if (!serverProfile) return null
-  const stored = getStoredAvatar()
-  if (stored !== null && stored !== serverProfile.avatar) {
-    return { ...serverProfile, avatar: stored }
-  }
-  return serverProfile
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -36,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select('*')
       .eq('id', userId)
       .single()
-    setProfile(mergeAvatarFromStorage(data))
+    setProfile(data)
   }
 
   useEffect(() => {
@@ -51,10 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const u = session?.user ?? null
       setUser(u)
       if (u) fetchProfile(u.id)
-      else {
-        setProfile(null)
-        clearStoredAvatar()
-      }
+      else setProfile(null)
     })
 
     return () => subscription.unsubscribe()
@@ -65,14 +52,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut()
     setUser(null)
     setProfile(null)
-    clearStoredAvatar()
   }
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return
-    if (updates.avatar !== undefined && updates.avatar !== null) {
-      setStoredAvatar(updates.avatar)
-    }
     setProfile(prev => prev ? { ...prev, ...updates } : prev)
     const { error } = await supabase
       .from('profiles')

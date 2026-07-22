@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { PixelIcon } from './PixelIcon'
+import { PixelAvatar } from './PixelAvatar'
 import { useAuth } from '../context/AuthContext'
-import { getAvatarUrl } from '../lib/avatar'
 import {
   fetchDayEntries, fetchAllUserEntries, fetchAllProfiles, getPreviousWeekRange,
   computeWeekStats, computeAllStats, computeStreak, computeBiggestSplurge,
@@ -222,12 +222,7 @@ function FriendLeaderboardSlide({ friendRankings, onNext, onPrev }: SlideProps) 
                 {entry.rank === 1 ? <PixelIcon name="crown" size={12} /> : entry.rank}
               </span>
               {entry.avatar ? (
-                <img
-                  src={getAvatarUrl(entry.avatar)}
-                  alt=""
-                  className="h-6 w-6 object-cover flex-shrink-0"
-                  style={{ border: '2px solid var(--pixel-border-light)', imageRendering: 'auto' }}
-                />
+                <PixelAvatar userId={entry.userId} size={24} />
               ) : (
                 <span
                   className="flex h-6 w-6 items-center justify-center text-faint flex-shrink-0"

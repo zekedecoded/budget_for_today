@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { PixelIcon } from './PixelIcon'
+import { PixelAvatar } from './PixelAvatar'
 import { supabase } from '../lib/supabase'
-import { getAvatarUrl } from '../lib/avatar'
 import type { DailyLimit } from '../types'
 
 function todayKey(): string {
@@ -76,12 +76,7 @@ export function DailyLimitsBoard() {
                     <span className="rank-badge text-faint">{rank}</span>
                   )}
                   {l.profiles?.avatar ? (
-                    <img
-                      src={getAvatarUrl(l.profiles.avatar)}
-                      alt=""
-                      className="h-6 w-6 object-cover flex-shrink-0"
-                      style={{ border: '2px solid var(--pixel-border-light)', imageRendering: 'auto' }}
-                    />
+                    <PixelAvatar userId={l.user_id} size={24} />
                   ) : (
                     <span
                       className="flex h-6 w-6 items-center justify-center text-faint flex-shrink-0"

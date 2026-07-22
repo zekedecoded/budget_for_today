@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { PixelIcon } from './PixelIcon'
+import { PixelAvatar } from './PixelAvatar'
 import { ScratchPanel } from './ScratchPanel'
 import { ConfettiBurst } from './ConfettiBurst'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import { getAvatarUrl } from '../lib/avatar'
 
 function formatTicketDate(d: Date): string {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -115,12 +115,7 @@ export function BudgetTicket() {
               </p>
               {user && profile?.avatar && (
                 <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 pixel-inner">
-                  <img
-                    src={getAvatarUrl(profile.avatar)}
-                    alt=""
-                    className="h-5 w-5"
-                    style={{ border: '1px solid var(--pixel-border-light)', imageRendering: 'auto' }}
-                  />
+                  <PixelAvatar userId={user.id} size={20} />
                   <span className="font-pixel text-[13px] text-muted">
                     {profile?.display_name || profile?.username || 'You'}
                   </span>
