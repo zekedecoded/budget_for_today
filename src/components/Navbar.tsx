@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faRightFromBracket, faUser, faCalendarWeek, faUserGroup } from '@fortawesome/free-solid-svg-icons'
+import { faRightFromBracket, faUser, faCalendarWeek, faTrophy } from '@fortawesome/free-solid-svg-icons'
 import { useAuth } from '../context/AuthContext'
 import { getAvatarUrl } from '../lib/avatar'
 import { isTodayMonday } from '../lib/stats'
@@ -32,9 +32,9 @@ export function Navbar() {
                 <span className="hidden sm:inline text-[10px]">Week</span>
               </Link>
             )}
-            <Link to="/friends" className="nav-icon-btn" title="Friends">
-              <FontAwesomeIcon icon={faUserGroup} />
-              <span className="hidden sm:inline text-[10px]">Friends</span>
+            <Link to="/friends" className="nav-icon-btn" title="Rankings">
+              <FontAwesomeIcon icon={faTrophy} />
+              <span className="hidden sm:inline text-[10px]">Rankings</span>
             </Link>
             <Link to="/profile" className="flex items-center gap-2 nav-icon-btn">
               {profile?.avatar ? (

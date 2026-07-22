@@ -2,14 +2,13 @@ import { useCallback, useEffect, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCrown, faTrophy, faArrowRight, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { useAuth } from '../context/AuthContext'
-import { supabase } from '../lib/supabase'
 import { getAvatarUrl } from '../lib/avatar'
 import {
-  fetchDayEntries, fetchFriendEntries, getCurrentWeekRange,
+  fetchAllUserEntries, fetchAllProfiles, getCurrentWeekRange,
   computeWeeklyLeastSpentRankings, computeAllTimeLeastSpentRankings,
   computeMostSavedRankings, computeStreakRankings, computeBiggestSplurgeRankings,
 } from '../lib/stats'
-import type { FriendRankEntry, Profile } from '../types'
+import type { FriendRankEntry } from '../types'
 
 type RankingCategory = 'weekly_least' | 'alltime_least' | 'most_saved' | 'streak' | 'splurge'
 
@@ -21,8 +20,8 @@ const CATEGORIES: { key: RankingCategory; label: string; icon: any }[] = [
   { key: 'splurge', label: 'Biggest Splurge', icon: faArrowLeft },
 ]
 
-export function FriendRankings() {
-  const { user, profile } = useAuth()
+export function Rankings() {
+  const { user } = useAuth()
   const [category, setCategory] = useState<RankingCategory>('weekly_least')
   const [rankings, setRankings] = useState<FriendRankEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -32,55 +31,38 @@ export function FriendRankings() {
     setLoading(true)
 
     const range = getCurrentWeekRange()
-    const entries = await fetchDayEntries(user.id)
-    const friendProfiles = await fetchAcceptedFriends(user.id)
-    const friendIds = friendProfiles.map(f => f.id)
-
     const weekStart = category === 'alltime_least' || category === 'most_saved' || category === 'streak' || category === 'splurge'
       ? undefined : range.start
     const weekEnd = category === 'alltime_least' || category === 'most_saved' || category === 'streak' || category === 'splurge'
       ? undefined : range.end
 
-    const friendEntriesMap = await fetchFriendEntries(
-      friendIds,
-      weekStart,
-      weekEnd,
-    )
-
-    const friendProfileMap = new Map<string, { username: string; display_name: string | null; avatar: number | null }>()
-    for (const fp of friendProfiles) {
-      friendProfileMap.set(fp.id, { username: fp.username, display_name: fp.display_name, avatar: fp.avatar })
-    }
-
-    const userDisplay = {
-      id: user.id,
-      username: profile?.username || '',
-      displayName: profile?.display_name || null,
-      avatar: profile?.avatar || null,
-    }
+    const [entriesMap, profilesMap] = await Promise.all([
+      fetchAllUserEntries(weekStart, weekEnd),
+      fetchAllProfiles(),
+    ])
 
     let result: FriendRankEntry[] = []
     switch (category) {
       case 'weekly_least':
-        result = computeWeeklyLeastSpentRankings(entries, friendEntriesMap, userDisplay, friendProfileMap)
+        result = computeWeeklyLeastSpentRankings(entriesMap, profilesMap)
         break
       case 'alltime_least':
-        result = computeAllTimeLeastSpentRankings(entries, friendEntriesMap, userDisplay, friendProfileMap)
+        result = computeAllTimeLeastSpentRankings(entriesMap, profilesMap)
         break
       case 'most_saved':
-        result = computeMostSavedRankings(entries, friendEntriesMap, userDisplay, friendProfileMap)
+        result = computeMostSavedRankings(entriesMap, profilesMap)
         break
       case 'streak':
-        result = computeStreakRankings(entries, friendEntriesMap, userDisplay, friendProfileMap)
+        result = computeStreakRankings(entriesMap, profilesMap)
         break
       case 'splurge':
-        result = computeBiggestSplurgeRankings(entries, friendEntriesMap, userDisplay, friendProfileMap)
+        result = computeBiggestSplurgeRankings(entriesMap, profilesMap)
         break
     }
 
     setRankings(result)
     setLoading(false)
-  }, [user, profile, category])
+  }, [user, category])
 
   useEffect(() => { computeRankings() }, [computeRankings])
 
@@ -104,7 +86,7 @@ export function FriendRankings() {
     <div className="game-card-solid mt-4">
       <div className="flex items-center gap-2 mb-3">
         <FontAwesomeIcon icon={faTrophy} className="text-[var(--pokemon-yellow)] text-sm" />
-        <h2 className="text-sm font-bold uppercase tracking-wider text-white/90">Friend Rankings</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wider text-white/90">Rankings</h2>
       </div>
 
       <div className="flex gap-1 flex-wrap mb-4">
@@ -128,7 +110,7 @@ export function FriendRankings() {
       {loading ? (
         <div className="flex justify-center py-6"><span className="pokeball-loader" /></div>
       ) : rankings.length === 0 ? (
-        <p className="text-center text-[10px] text-white/30 py-4">No friends to rank yet. Add some friends first!</p>
+        <p className="text-center text-[10px] text-white/30 py-4">No data yet. Start tracking your spending!</p>
       ) : (
         <div className="space-y-1 max-h-[400px] overflow-y-auto pr-1">
           {rankings.map(entry => {
@@ -164,26 +146,4 @@ export function FriendRankings() {
       )}
     </div>
   )
-}
-
-async function fetchAcceptedFriends(userId: string): Promise<Profile[]> {
-  const { data: friendships } = await supabase
-    .from('friendships')
-    .select('friend_id')
-    .eq('user_id', userId)
-    .eq('status', 'accepted')
-  const { data: reverse } = await supabase
-    .from('friendships')
-    .select('user_id')
-    .eq('friend_id', userId)
-    .eq('status', 'accepted')
-  const friendIds = new Set<string>()
-  for (const f of friendships || []) friendIds.add(f.friend_id)
-  for (const f of reverse || []) friendIds.add(f.user_id)
-  if (friendIds.size === 0) return []
-  const { data: profiles } = await supabase
-    .from('profiles')
-    .select('*')
-    .in('id', [...friendIds])
-  return (profiles || []) as Profile[]
 }

@@ -20,7 +20,9 @@ export function ReceiptPanel() {
   const [itemAmount, setItemAmount] = useState('')
   const [saving, setSaving] = useState(false)
   const nameInputRef = useRef<HTMLInputElement>(null)
+  const amountInputRef = useRef<HTMLInputElement>(null)
   const listEndRef = useRef<HTMLDivElement>(null)
+  const purchasesRef = useRef<Purchase[]>([])
 
   const fetchToday = useCallback(async () => {
     if (!user) { setEntry(null); setLoading(false); return }
@@ -38,7 +40,26 @@ export function ReceiptPanel() {
 
   useEffect(() => { fetchToday() }, [fetchToday])
 
+  useEffect(() => {
+    if (!user) return
+    const channel = supabase
+      .channel('receipt_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'daily_limits',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => { fetchToday() },
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [user, fetchToday])
+
   const purchases: Purchase[] = Array.isArray(entry?.purchases) ? entry.purchases : []
+  purchasesRef.current = purchases
   const spent = spentFromPurchases(purchases)
   const budget = entry?.amount ?? 0
   const diff = budget - spent
@@ -55,26 +76,22 @@ export function ReceiptPanel() {
   }, [user, entry])
 
   const handleAdd = useCallback(() => {
-    const name = itemName.trim()
-    const amount = parseFloat(itemAmount)
+    const name = nameInputRef.current?.value.trim() ?? ''
+    const amount = parseFloat(amountInputRef.current?.value ?? '')
     if (!name || isNaN(amount) || amount <= 0) return
     const newPurchase: Purchase = { id: genPurchaseId(), name, amount }
-    const newPurchases = [...purchases, newPurchase]
+    const newPurchases = [...purchasesRef.current, newPurchase]
     updatePurchases(newPurchases)
     setItemName('')
     setItemAmount('')
     nameInputRef.current?.focus()
     setTimeout(() => listEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
-  }, [itemName, itemAmount, purchases, updatePurchases])
+  }, [updatePurchases])
 
   const handleRemove = useCallback((id: string) => {
-    const newPurchases = purchases.filter(p => p.id !== id)
+    const newPurchases = purchasesRef.current.filter(p => p.id !== id)
     updatePurchases(newPurchases)
-  }, [purchases, updatePurchases])
-
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleAdd()
-  }, [handleAdd])
+  }, [updatePurchases])
 
   if (!user) return null
 
@@ -150,36 +167,39 @@ export function ReceiptPanel() {
             </div>
           </div>
 
-          <div className="flex gap-2 mt-3">
+          <form
+            className="mt-3 space-y-2"
+            onSubmit={e => { e.preventDefault(); handleAdd() }}
+          >
             <input
               ref={nameInputRef}
               type="text"
               value={itemName}
               onChange={e => setItemName(e.target.value)}
-              onKeyDown={handleKeyDown}
               placeholder="Item name"
               maxLength={50}
-              className="game-input flex-1 min-w-0 text-[11px]"
+              className="game-input w-full text-[11px]"
             />
-            <input
-              type="number"
-              value={itemAmount}
-              onChange={e => setItemAmount(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-              className="game-input w-24 text-[11px] text-right"
-            />
-            <button
-              type="button"
-              onClick={handleAdd}
-              disabled={!itemName.trim() || !itemAmount || saving}
-              className="game-btn game-btn-yellow game-btn-sm flex-shrink-0"
-            >
-              <FontAwesomeIcon icon={faPlus} />
-            </button>
-          </div>
+            <div className="flex gap-2">
+              <input
+                ref={amountInputRef}
+                type="number"
+                value={itemAmount}
+                onChange={e => setItemAmount(e.target.value)}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                className="game-input flex-1 text-[11px] text-right"
+              />
+              <button
+                type="submit"
+                disabled={!itemName.trim() || !itemAmount || saving}
+                className="game-btn game-btn-yellow game-btn-sm flex-shrink-0"
+              >
+                <FontAwesomeIcon icon={faPlus} />
+              </button>
+            </div>
+          </form>
         </>
       )}
     </div>

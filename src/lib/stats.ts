@@ -134,16 +134,13 @@ export async function fetchDayEntries(userId: string, startDate?: string, endDat
   }))
 }
 
-export async function fetchFriendEntries(
-  friendIds: string[],
+export async function fetchAllUserEntries(
   startDate?: string,
   endDate?: string,
 ): Promise<Map<string, DayEntry[]>> {
-  if (friendIds.length === 0) return new Map()
   let query = supabase
     .from('daily_limits')
     .select('*')
-    .in('user_id', friendIds)
     .order('date', { ascending: true })
   if (startDate) query = query.gte('date', startDate)
   if (endDate) query = query.lte('date', endDate)
@@ -163,186 +160,83 @@ export async function fetchFriendEntries(
   return map
 }
 
-export function computeWeeklyLeastSpentRankings(
-  userEntries: DayEntry[],
-  friendEntriesMap: Map<string, DayEntry[]>,
-  userDisplay: { id: string; username: string; displayName: string | null; avatar: number | null },
-  friendProfiles: Map<string, { username: string; display_name: string | null; avatar: number | null }>,
+export async function fetchAllProfiles(): Promise<Map<string, { username: string; display_name: string | null; avatar: number | null }>> {
+  const { data } = await supabase.from('profiles').select('id, username, display_name, avatar')
+  const map = new Map<string, { username: string; display_name: string | null; avatar: number | null }>()
+  for (const p of data || []) {
+    map.set(p.id, { username: p.username, display_name: p.display_name, avatar: p.avatar })
+  }
+  return map
+}
+
+function toRankings(
+  entriesMap: Map<string, DayEntry[]>,
+  profilesMap: Map<string, { username: string; display_name: string | null; avatar: number | null }>,
+  computeValue: (entries: DayEntry[]) => number,
+  sortAsc: boolean,
 ): FriendRankEntry[] {
-  const range = getCurrentWeekRange()
   const all: FriendRankEntry[] = []
-
-  const userWeekEntries = userEntries.filter(e => e.date >= range.start && e.date <= range.end)
-  const userWeekSpent = userWeekEntries.reduce((s, e) => s + spentFromPurchases(e.purchases), 0)
-  all.push({
-    userId: userDisplay.id,
-    username: userDisplay.username,
-    displayName: userDisplay.displayName,
-    avatar: userDisplay.avatar,
-    value: userWeekSpent,
-    rank: 0,
-  })
-
-  for (const [friendId, entries] of friendEntriesMap) {
-    const profile = friendProfiles.get(friendId)
+  for (const [userId, entries] of entriesMap) {
+    const profile = profilesMap.get(userId)
     if (!profile) continue
-    const weekEntries = entries.filter(e => e.date >= range.start && e.date <= range.end)
-    const weekSpent = weekEntries.reduce((s, e) => s + spentFromPurchases(e.purchases), 0)
     all.push({
-      userId: friendId,
+      userId,
       username: profile.username,
       displayName: profile.display_name,
       avatar: profile.avatar,
-      value: weekSpent,
+      value: computeValue(entries),
       rank: 0,
     })
   }
-
-  all.sort((a, b) => a.value - b.value)
+  all.sort((a, b) => sortAsc ? a.value - b.value : b.value - a.value)
   all.forEach((entry, i) => { entry.rank = i + 1 })
   return all
+}
+
+function weekRangeFilter(entries: DayEntry[], range: WeekRange): DayEntry[] {
+  return entries.filter(e => e.date >= range.start && e.date <= range.end)
+}
+
+export function computeWeeklyLeastSpentRankings(
+  entriesMap: Map<string, DayEntry[]>,
+  profilesMap: Map<string, { username: string; display_name: string | null; avatar: number | null }>,
+): FriendRankEntry[] {
+  const range = getCurrentWeekRange()
+  const filtered = new Map<string, DayEntry[]>()
+  for (const [uid, entries] of entriesMap) {
+    const weekEntries = weekRangeFilter(entries, range)
+    if (weekEntries.length > 0) filtered.set(uid, weekEntries)
+  }
+  return toRankings(filtered, profilesMap, es => es.reduce((s, e) => s + spentFromPurchases(e.purchases), 0), true)
 }
 
 export function computeAllTimeLeastSpentRankings(
-  userEntries: DayEntry[],
-  friendEntriesMap: Map<string, DayEntry[]>,
-  userDisplay: { id: string; username: string; displayName: string | null; avatar: number | null },
-  friendProfiles: Map<string, { username: string; display_name: string | null; avatar: number | null }>,
+  entriesMap: Map<string, DayEntry[]>,
+  profilesMap: Map<string, { username: string; display_name: string | null; avatar: number | null }>,
 ): FriendRankEntry[] {
-  const all: FriendRankEntry[] = []
-
-  const userTotalSpent = userEntries.reduce((s, e) => s + spentFromPurchases(e.purchases), 0)
-  all.push({
-    userId: userDisplay.id,
-    username: userDisplay.username,
-    displayName: userDisplay.displayName,
-    avatar: userDisplay.avatar,
-    value: userTotalSpent,
-    rank: 0,
-  })
-
-  for (const [friendId, entries] of friendEntriesMap) {
-    const profile = friendProfiles.get(friendId)
-    if (!profile) continue
-    const totalSpent = entries.reduce((s, e) => s + spentFromPurchases(e.purchases), 0)
-    all.push({
-      userId: friendId,
-      username: profile.username,
-      displayName: profile.display_name,
-      avatar: profile.avatar,
-      value: totalSpent,
-      rank: 0,
-    })
-  }
-
-  all.sort((a, b) => a.value - b.value)
-  all.forEach((entry, i) => { entry.rank = i + 1 })
-  return all
+  return toRankings(entriesMap, profilesMap, es => es.reduce((s, e) => s + spentFromPurchases(e.purchases), 0), true)
 }
 
 export function computeMostSavedRankings(
-  userEntries: DayEntry[],
-  friendEntriesMap: Map<string, DayEntry[]>,
-  userDisplay: { id: string; username: string; displayName: string | null; avatar: number | null },
-  friendProfiles: Map<string, { username: string; display_name: string | null; avatar: number | null }>,
+  entriesMap: Map<string, DayEntry[]>,
+  profilesMap: Map<string, { username: string; display_name: string | null; avatar: number | null }>,
 ): FriendRankEntry[] {
-  const all: FriendRankEntry[] = []
-
-  all.push({
-    userId: userDisplay.id,
-    username: userDisplay.username,
-    displayName: userDisplay.displayName,
-    avatar: userDisplay.avatar,
-    value: computeNetBalance(userEntries),
-    rank: 0,
-  })
-
-  for (const [friendId, entries] of friendEntriesMap) {
-    const profile = friendProfiles.get(friendId)
-    if (!profile) continue
-    all.push({
-      userId: friendId,
-      username: profile.username,
-      displayName: profile.display_name,
-      avatar: profile.avatar,
-      value: computeNetBalance(entries),
-      rank: 0,
-    })
-  }
-
-  all.sort((a, b) => b.value - a.value)
-  all.forEach((entry, i) => { entry.rank = i + 1 })
-  return all
+  return toRankings(entriesMap, profilesMap, computeNetBalance, false)
 }
 
 export function computeStreakRankings(
-  userEntries: DayEntry[],
-  friendEntriesMap: Map<string, DayEntry[]>,
-  userDisplay: { id: string; username: string; displayName: string | null; avatar: number | null },
-  friendProfiles: Map<string, { username: string; display_name: string | null; avatar: number | null }>,
+  entriesMap: Map<string, DayEntry[]>,
+  profilesMap: Map<string, { username: string; display_name: string | null; avatar: number | null }>,
 ): FriendRankEntry[] {
-  const all: FriendRankEntry[] = []
-
-  all.push({
-    userId: userDisplay.id,
-    username: userDisplay.username,
-    displayName: userDisplay.displayName,
-    avatar: userDisplay.avatar,
-    value: computeStreak(userEntries),
-    rank: 0,
-  })
-
-  for (const [friendId, entries] of friendEntriesMap) {
-    const profile = friendProfiles.get(friendId)
-    if (!profile) continue
-    all.push({
-      userId: friendId,
-      username: profile.username,
-      displayName: profile.display_name,
-      avatar: profile.avatar,
-      value: computeStreak(entries),
-      rank: 0,
-    })
-  }
-
-  all.sort((a, b) => b.value - a.value)
-  all.forEach((entry, i) => { entry.rank = i + 1 })
-  return all
+  return toRankings(entriesMap, profilesMap, computeStreak, false)
 }
 
 export function computeBiggestSplurgeRankings(
-  userEntries: DayEntry[],
-  friendEntriesMap: Map<string, DayEntry[]>,
-  userDisplay: { id: string; username: string; displayName: string | null; avatar: number | null },
-  friendProfiles: Map<string, { username: string; display_name: string | null; avatar: number | null }>,
+  entriesMap: Map<string, DayEntry[]>,
+  profilesMap: Map<string, { username: string; display_name: string | null; avatar: number | null }>,
 ): FriendRankEntry[] {
-  const all: FriendRankEntry[] = []
-
-  const userSplurge = computeBiggestSplurge(userEntries)
-  all.push({
-    userId: userDisplay.id,
-    username: userDisplay.username,
-    displayName: userDisplay.displayName,
-    avatar: userDisplay.avatar,
-    value: userSplurge?.amount ?? 0,
-    rank: 0,
-  })
-
-  for (const [friendId, entries] of friendEntriesMap) {
-    const profile = friendProfiles.get(friendId)
-    if (!profile) continue
-    const splurge = computeBiggestSplurge(entries)
-    all.push({
-      userId: friendId,
-      username: profile.username,
-      displayName: profile.display_name,
-      avatar: profile.avatar,
-      value: splurge?.amount ?? 0,
-      rank: 0,
-    })
-  }
-
-  all.sort((a, b) => b.value - a.value)
-  all.forEach((entry, i) => { entry.rank = i + 1 })
-  return all
+  return toRankings(entriesMap, profilesMap, es => {
+    const s = computeBiggestSplurge(es)
+    return s?.amount ?? 0
+  }, false)
 }

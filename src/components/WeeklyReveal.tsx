@@ -8,12 +8,11 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { getAvatarUrl } from '../lib/avatar'
 import {
-  fetchDayEntries, fetchFriendEntries, getPreviousWeekRange,
+  fetchDayEntries, fetchAllUserEntries, fetchAllProfiles, getPreviousWeekRange,
   computeWeekStats, computeAllStats, computeStreak, computeBiggestSplurge,
   computeWeeklyLeastSpentRankings, computeNetBalance,
   diffFromEntry, spentFromPurchases,
 } from '../lib/stats'
-import { supabase } from '../lib/supabase'
 import type { WeekStats, FriendRankEntry, Profile } from '../types'
 
 interface SlideProps {
@@ -315,26 +314,15 @@ export function WeeklyReveal({ onClose }: WeeklyRevealProps) {
     const range = getPreviousWeekRange()
     Promise.all([
       fetchDayEntries(user.id),
-      supabaseFriendProfiles(user.id),
-    ]).then(async ([entries, friendProfiles]) => {
+      fetchAllUserEntries(range.start, range.end),
+      fetchAllProfiles(),
+    ]).then(async ([entries, allEntriesMap, allProfilesMap]) => {
       const ws = computeWeekStats(entries, range)
       const as = computeAllStats(entries)
       setWeekStats(ws)
       setAllStats(as)
 
-      const friendIds = friendProfiles.map(f => f.id)
-      const friendEntriesMap = await fetchFriendEntries(friendIds, range.start, range.end)
-
-      const friendProfileMap = new Map<string, { username: string; display_name: string | null; avatar: number | null }>()
-      for (const fp of friendProfiles) {
-        friendProfileMap.set(fp.id, { username: fp.username, display_name: fp.display_name, avatar: fp.avatar })
-      }
-
-      const rankings = computeWeeklyLeastSpentRankings(
-        entries, friendEntriesMap,
-        { id: user.id, username: profile?.username || '', displayName: profile?.display_name || null, avatar: profile?.avatar || null },
-        friendProfileMap,
-      )
+      const rankings = computeWeeklyLeastSpentRankings(allEntriesMap, allProfilesMap)
       setFriendRankings(rankings)
       const myRank = rankings.find(r => r.userId === user.id)
       setUserRank(myRank?.rank ?? 0)
@@ -424,24 +412,4 @@ export function WeeklyReveal({ onClose }: WeeklyRevealProps) {
   )
 }
 
-async function supabaseFriendProfiles(userId: string): Promise<Profile[]> {
-  const { data: friendships } = await supabase
-    .from('friendships')
-    .select('friend_id')
-    .eq('user_id', userId)
-    .eq('status', 'accepted')
-  const { data: reverse } = await supabase
-    .from('friendships')
-    .select('user_id')
-    .eq('friend_id', userId)
-    .eq('status', 'accepted')
-  const friendIds = new Set<string>()
-  for (const f of friendships || []) friendIds.add(f.friend_id)
-  for (const f of reverse || []) friendIds.add(f.user_id)
-  if (friendIds.size === 0) return []
-  const { data: profiles } = await supabase
-    .from('profiles')
-    .select('*')
-    .in('id', [...friendIds])
-  return (profiles || []) as Profile[]
-}
+
