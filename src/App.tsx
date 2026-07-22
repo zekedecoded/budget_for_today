@@ -5,6 +5,8 @@ import { Dashboard } from './pages/Dashboard'
 import { Login } from './pages/Login'
 import { Signup } from './pages/Signup'
 import { Profile } from './pages/Profile'
+import { Weekly } from './pages/Weekly'
+import { Friends } from './pages/Friends'
 import Prism from './components/Prism/Prism'
 
 export default function App() {
@@ -49,6 +51,8 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/weekly" element={<Weekly />} />
+            <Route path="/friends" element={<Friends />} />
           </Routes>
         </main>
       </div>
