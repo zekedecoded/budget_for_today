@@ -1,9 +1,18 @@
-export const AVATAR_COUNT = 10
+export const AVATAR_COUNT = 6
+
+const AVATAR_FILES = [
+  'avatar-1.png',
+  'avatar-2.png',
+  'avatar-3.png',
+  'avatar-4.png',
+  'avatar-5.png',
+  'avatar-6.jpg',
+]
 
 const STORAGE_KEY = 'daily_spending_avatar'
 
 export function getAvatarUrl(index: number): string {
-  return `/avatars/avatar-${index}.png`
+  return `/avatars/${AVATAR_FILES[index - 1] ?? AVATAR_FILES[0]}`
 }
 
 export function getStoredAvatar(): number | null {
