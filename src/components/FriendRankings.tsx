@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCrown, faTrophy, faArrowRight, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import { PixelIcon } from './PixelIcon'
 import { useAuth } from '../context/AuthContext'
 import { getAvatarUrl } from '../lib/avatar'
 import {
@@ -12,12 +11,12 @@ import type { FriendRankEntry } from '../types'
 
 type RankingCategory = 'weekly_least' | 'alltime_least' | 'most_saved' | 'streak' | 'splurge'
 
-const CATEGORIES: { key: RankingCategory; label: string; icon: any }[] = [
-  { key: 'weekly_least', label: 'Least Spent (Week)', icon: faTrophy },
-  { key: 'alltime_least', label: 'Least Spent (All-Time)', icon: faTrophy },
-  { key: 'most_saved', label: 'Most Saved', icon: faCrown },
-  { key: 'streak', label: 'Best Streak', icon: faArrowRight },
-  { key: 'splurge', label: 'Biggest Splurge', icon: faArrowLeft },
+const CATEGORIES: { key: RankingCategory; label: string; icon: 'trophy' | 'crown' | 'arrow-right' | 'arrow-left' }[] = [
+  { key: 'weekly_least', label: 'Least Spent (Week)', icon: 'trophy' },
+  { key: 'alltime_least', label: 'Least Spent (All-Time)', icon: 'trophy' },
+  { key: 'most_saved', label: 'Most Saved', icon: 'crown' },
+  { key: 'streak', label: 'Best Streak', icon: 'arrow-right' },
+  { key: 'splurge', label: 'Biggest Splurge', icon: 'arrow-left' },
 ]
 
 export function Rankings() {
@@ -83,10 +82,10 @@ export function Rankings() {
   if (!user) return null
 
   return (
-    <div className="game-card-solid mt-4">
+    <div className="pixel-panel mt-4">
       <div className="flex items-center gap-2 mb-3">
-        <FontAwesomeIcon icon={faTrophy} className="text-[var(--pokemon-yellow)] text-sm" />
-        <h2 className="text-sm font-bold uppercase tracking-wider text-white/90">Rankings</h2>
+        <PixelIcon name="trophy" size={16} className="text-amber" />
+        <h2 className="font-pixel text-[16px] text-primary uppercase tracking-wider">Rankings</h2>
       </div>
 
       <div className="flex gap-1 flex-wrap mb-4">
@@ -95,48 +94,54 @@ export function Rankings() {
             key={cat.key}
             type="button"
             onClick={() => setCategory(cat.key)}
-            className={`text-[9px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-lg border transition-all ${
-              category === cat.key
-                ? 'border-[var(--pokemon-yellow)] bg-[var(--pokemon-yellow)]/10 text-[var(--pokemon-yellow)]'
-                : 'border-white/10 text-white/40 hover:text-white/60 hover:border-white/20'
-            }`}
+            className={`category-tag ${category === cat.key ? 'active' : ''}`}
           >
-            <FontAwesomeIcon icon={cat.icon} className="mr-1" />
+            <PixelIcon name={cat.icon} size={10} className="mr-1" />
             {cat.label}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-6"><span className="pokeball-loader" /></div>
+        <div className="flex justify-center py-6">
+          <span className="font-pixel text-[16px] text-faint">Loading...</span>
+        </div>
       ) : rankings.length === 0 ? (
-        <p className="text-center text-[10px] text-white/30 py-4">No data yet. Start tracking your spending!</p>
+        <p className="text-center font-pixel text-[13px] text-faint py-4">
+          No data yet. Start tracking!
+        </p>
       ) : (
-        <div className="space-y-1 max-h-[400px] overflow-y-auto pr-1">
+        <div className="max-h-[400px] overflow-y-auto pr-1">
           {rankings.map(entry => {
             const isMe = entry.userId === user?.id
             return (
               <div
                 key={entry.userId}
-                className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 ${
-                  isMe ? 'border-[var(--pokemon-yellow)]/30 bg-[var(--pokemon-yellow)]/[0.04]' : 'border-white/5 bg-white/[0.02]'
-                }`}
+                className={`ranking-row ${isMe ? 'highlight' : ''}`}
               >
-                <span className={`flex items-center justify-center w-6 h-6 rounded-lg text-[10px] font-bold flex-shrink-0 ${
-                  entry.rank === 1 ? 'rank-1' : entry.rank === 2 ? 'rank-2' : entry.rank === 3 ? 'rank-3' : 'text-white/30 bg-white/5'
-                }`}>
-                  {entry.rank === 1 ? <FontAwesomeIcon icon={faCrown} /> : entry.rank}
+                <span className={`rank-badge ${entry.rank === 1 ? 'gold' : entry.rank === 2 ? 'silver' : entry.rank === 3 ? 'bronze' : 'text-faint'}`}>
+                  {entry.rank === 1 ? <PixelIcon name="crown" size={12} /> : entry.rank}
                 </span>
                 {entry.avatar ? (
-                  <img src={getAvatarUrl(entry.avatar)} alt="" className="h-6 w-6 rounded-full border border-white/10 object-cover flex-shrink-0" />
+                  <img
+                    src={getAvatarUrl(entry.avatar)}
+                    alt=""
+                    className="h-6 w-6 object-cover flex-shrink-0"
+                    style={{ border: '2px solid var(--pixel-border-light)', imageRendering: 'auto' }}
+                  />
                 ) : (
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/5 text-[8px] text-white/20 flex-shrink-0">?</span>
+                  <span
+                    className="flex h-6 w-6 items-center justify-center text-faint flex-shrink-0"
+                    style={{ border: '2px solid var(--pixel-border-light)', background: 'rgba(0,0,0,0.1)' }}
+                  >
+                    ?
+                  </span>
                 )}
-                <span className="flex-1 text-[11px] font-bold text-white/70 truncate">
+                <span className="flex-1 font-pixel text-[14px] text-primary truncate">
                   {entry.displayName || entry.username}
-                  {isMe && <span className="text-[8px] text-[var(--pokemon-yellow)]/60 ml-1">(you)</span>}
+                  {isMe && <span className="font-pixel text-[11px] text-faint ml-1">(you)</span>}
                 </span>
-                <span className="text-[11px] font-bold text-white/80 font-mono tabular-nums">
+                <span className="font-pixel text-[15px] text-muted">
                   {labelSuffix(entry)}
                 </span>
               </div>

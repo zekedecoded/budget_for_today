@@ -1,22 +1,21 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrophy } from '@fortawesome/free-solid-svg-icons'
+import { PixelIcon } from '../components/PixelIcon'
 import { DailyLimitsBoard } from '../components/DailyLimitsBoard'
 import { Rankings } from '../components/FriendRankings'
 
 export function Friends() {
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6">
-      <div className="flex flex-col items-center mb-6">
-        <FontAwesomeIcon icon={faTrophy} className="text-2xl text-[var(--pokemon-yellow)] mb-2" />
-        <h1 className="daily-drop-title text-lg">Leaderboard</h1>
-        <p className="daily-drop-subtitle">See how you rank against all trainers</p>
+    <div className="page-container pt-6">
+      <div className="page-header">
+        <PixelIcon name="trophy" size={20} className="text-amber mb-1" />
+        <h1 className="page-title">Rankings</h1>
+        <p className="page-subtitle">See where you stand on the board</p>
       </div>
 
-      <div className="w-full max-w-lg mx-auto">
+      <div>
         <DailyLimitsBoard />
       </div>
 
-      <div className="w-full max-w-lg mx-auto">
+      <div>
         <Rankings />
       </div>
     </div>

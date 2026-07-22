@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus, faTrashCan, faReceipt } from '@fortawesome/free-solid-svg-icons'
+import { PixelIcon } from './PixelIcon'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { todayKey, spentFromPurchases } from '../lib/stats'
@@ -96,52 +95,55 @@ export function ReceiptPanel() {
   if (!user) return null
 
   return (
-    <div className="game-card-solid mt-4">
+    <div className="pixel-panel mt-4">
       <div className="flex items-center gap-2 mb-4">
-        <FontAwesomeIcon icon={faReceipt} className="text-[var(--pokemon-yellow)] text-sm" />
-        <h2 className="text-sm font-bold uppercase tracking-wider text-white/90" style={{ fontFamily: 'var(--font-body)' }}>
-          Today's Receipt
+        <PixelIcon name="receipt" size={16} className="text-amber" />
+        <h2 className="font-pixel text-[16px] text-primary uppercase tracking-wider">
+          Expense List
         </h2>
-        {saving && <span className="pokeball-loader ml-auto" style={{ width: 18, height: 18 }} />}
+        <span className="ml-auto font-pixel text-[12px] text-faint">{todayKey()}</span>
+        {saving && <span className="font-pixel text-[12px] text-faint">...</span>}
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-8">
-          <span className="pokeball-loader" />
+          <span className="font-pixel text-[16px] text-faint">Loading...</span>
         </div>
       ) : !entry ? (
         <div className="text-center py-6">
-          <span className="pokeball mx-auto mb-3 opacity-30" aria-hidden="true" />
-          <p className="text-xs text-white/40">Scratch your daily drop first</p>
-          <p className="text-[10px] text-white/20 mt-1">Then log your purchases here</p>
+          <p className="font-pixel text-[14px] text-muted">Open your daily budget first</p>
+          <p className="font-pixel text-[12px] text-faint mt-1">Then you can log your expenses</p>
         </div>
       ) : (
         <>
-          <div className="receipt-paper rounded-xl border border-white/10 bg-white/[0.03] p-3">
-            <div className="text-center border-b border-dashed border-white/10 pb-2 mb-2">
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/40">
-                DAILY SPENDING RECEIPT
-              </p>
-              <p className="text-[8px] text-white/20 mt-0.5">
-                {todayKey()}
+          <div className="pixel-inner">
+            <div className="text-center py-2" style={{ borderBottom: '2px dashed var(--pixel-border-light)' }}>
+              <p className="font-pixel text-[12px] text-faint uppercase tracking-wider">
+                EXPENSE LIST
               </p>
             </div>
 
-            <div className="space-y-1 min-h-[60px]">
+            <div className="min-h-[60px]">
               {purchases.length === 0 ? (
-                <p className="text-[10px] text-white/20 text-center py-4 italic">No purchases logged yet</p>
+                <p className="font-pixel text-[13px] text-faint text-center py-4">No items yet</p>
               ) : (
-                purchases.map(p => (
-                  <div key={p.id} className="receipt-item flex items-center gap-2 py-1 px-1 rounded hover:bg-white/[0.03] group">
-                    <span className="flex-1 text-[11px] font-medium text-white/70 truncate">{p.name}</span>
-                    <span className="text-[11px] font-bold text-white/80 font-mono tabular-nums">P{p.amount.toFixed(2)}</span>
+                purchases.map((p, idx) => (
+                  <div
+                    key={p.id}
+                    className="entry-row animate-slide-in"
+                    style={{ animationDelay: `${idx * 0.04}s` }}
+                  >
+                    <span className="flex-1 font-body text-[12px] text-primary truncate">{p.name}</span>
+                    <span className="font-pixel text-[15px] text-primary">
+                      P{p.amount.toFixed(2)}
+                    </span>
                     <button
                       type="button"
                       onClick={() => handleRemove(p.id)}
-                      className="text-white/10 hover:text-red-400 transition-colors text-[10px] opacity-0 group-hover:opacity-100"
+                      className="text-faint hover:text-danger transition-colors opacity-0 hover:opacity-100"
                       aria-label="Remove item"
                     >
-                      <FontAwesomeIcon icon={faTrashCan} />
+                      <PixelIcon name="trash" size={12} />
                     </button>
                   </div>
                 ))
@@ -149,19 +151,22 @@ export function ReceiptPanel() {
               <div ref={listEndRef} />
             </div>
 
-            <div className="border-t border-dashed border-white/10 mt-2 pt-2">
-              <div className="flex items-center justify-between px-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">Budget</span>
-                <span className="text-[12px] font-bold text-white/60 font-mono tabular-nums">P{budget.toFixed(2)}</span>
+            <div style={{ borderTop: '2px dashed var(--pixel-border-light)' }}>
+              <div className="flex items-center justify-between px-3 py-1.5">
+                <span className="font-pixel text-[13px] text-muted uppercase tracking-wider">Budget</span>
+                <span className="font-pixel text-[16px] text-primary">P{budget.toFixed(2)}</span>
               </div>
-              <div className="flex items-center justify-between px-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">Spent</span>
-                <span className="text-[12px] font-bold text-white/80 font-mono tabular-nums">P{spent.toFixed(2)}</span>
+              <div className="flex items-center justify-between px-3 py-1.5">
+                <span className="font-pixel text-[13px] text-muted uppercase tracking-wider">Spent</span>
+                <span className="font-pixel text-[16px] text-primary">P{spent.toFixed(2)}</span>
               </div>
-              <div className="flex items-center justify-between px-1 pt-1 border-t border-white/10 mt-1">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-white/60">Remaining</span>
-                <span className={`text-[14px] font-bold font-mono tabular-nums ${diff >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {diff >= 0 ? '+' : ''}P{diff.toFixed(2)}
+              <div className="flex items-center justify-between px-3 py-1.5" style={{ borderTop: '2px solid var(--pixel-border-light)' }}>
+                <span className="font-pixel text-[14px] text-primary uppercase tracking-wider">Remaining</span>
+                <span
+                  className="font-pixel text-[18px]"
+                  style={{ color: diff >= 0 ? 'var(--moss-light)' : 'var(--overspend-light)' }}
+                >
+                  {diff >= 0 ? '' : '-'}P{Math.abs(diff).toFixed(2)}
                 </span>
               </div>
             </div>
@@ -176,9 +181,9 @@ export function ReceiptPanel() {
               type="text"
               value={itemName}
               onChange={e => setItemName(e.target.value)}
-              placeholder="Item name"
+              placeholder="What did you buy?"
               maxLength={50}
-              className="game-input w-full text-[11px]"
+              className="pixel-input text-[12px]"
             />
             <div className="flex gap-2">
               <input
@@ -186,17 +191,17 @@ export function ReceiptPanel() {
                 type="number"
                 value={itemAmount}
                 onChange={e => setItemAmount(e.target.value)}
-                placeholder="0.00"
+                placeholder="How much?"
                 min="0"
                 step="0.01"
-                className="game-input flex-1 text-[11px] text-right"
+                className="pixel-input flex-1 text-[12px]"
               />
               <button
                 type="submit"
                 disabled={!itemName.trim() || !itemAmount || saving}
-                className="game-btn game-btn-yellow game-btn-sm flex-shrink-0"
+                className="pixel-btn pixel-btn-primary pixel-btn-sm flex-shrink-0"
               >
-                <FontAwesomeIcon icon={faPlus} />
+                <PixelIcon name="plus" size={12} />
               </button>
             </div>
           </form>

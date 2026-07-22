@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCalendarWeek, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import { PixelIcon } from '../components/PixelIcon'
 import { WeeklyReveal } from '../components/WeeklyReveal'
 import { isTodayMonday } from '../lib/stats'
 
@@ -9,17 +8,18 @@ export function Weekly() {
 
   if (!isTodayMonday()) {
     return (
-      <div className="flex min-h-full items-center justify-center px-4">
-        <div className="text-center max-w-sm">
-          <span className="pokeball pokeball-lg mx-auto mb-4 opacity-30" aria-hidden="true" />
-          <FontAwesomeIcon icon={faCalendarWeek} className="text-3xl text-white/20 mb-4" />
-          <h2 className="text-lg font-bold uppercase tracking-wider text-white/50" style={{ fontFamily: 'var(--font-display)' }}>
-            Weekly Wrap
-          </h2>
-          <p className="text-sm text-white/40 mt-3">Come back on Monday to see your weekly wrap!</p>
-          <p className="text-[10px] text-white/20 mt-1">Wrapped reveals every Monday for the previous week.</p>
-          <button type="button" onClick={() => navigate('/')} className="game-btn game-btn-ghost game-btn-sm mt-6">
-            <FontAwesomeIcon icon={faArrowLeft} /> Back to Dashboard
+      <div className="page-container pt-12">
+        <div className="text-center max-w-sm mx-auto">
+          <PixelIcon name="calendar" size={40} className="text-faint mb-4" />
+          <h2 className="page-title text-center">Weekly Wrap</h2>
+          <p className="font-pixel text-[16px] text-muted mt-3">
+            Come back on Monday to see your weekly wrap!
+          </p>
+          <p className="font-pixel text-[12px] text-faint mt-1">
+            The previous week's summary appears every Monday.
+          </p>
+          <button type="button" onClick={() => navigate('/')} className="pixel-btn pixel-btn-ghost pixel-btn-sm mt-6">
+            <PixelIcon name="arrow-left" size={12} /> Back
           </button>
         </div>
       </div>
@@ -27,7 +27,7 @@ export function Weekly() {
   }
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-6">
+    <div className="page-container pt-6">
       <WeeklyReveal onClose={() => navigate('/')} />
     </div>
   )

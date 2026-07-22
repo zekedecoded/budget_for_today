@@ -1,22 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faStar, faBolt, faFire, faGem, faArrowRotateRight } from '@fortawesome/free-solid-svg-icons'
+import { PixelIcon } from './PixelIcon'
 import { ScratchPanel } from './ScratchPanel'
 import { ConfettiBurst } from './ConfettiBurst'
-import { BarcodeStripe } from './BarcodeStripe'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { getAvatarUrl } from '../lib/avatar'
 
 function formatTicketDate(d: Date): string {
-  const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
-  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-  return days[d.getDay()] + ' \u00B7 ' + months[d.getMonth()] + ' ' + String(d.getDate()).padStart(2, '0') + ' ' + d.getFullYear()
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  return days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear()
 }
 
 function shortDate(d: Date): string {
-  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-  return months[d.getMonth()] + ' ' + String(d.getDate()).padStart(2, '0')
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  return months[d.getMonth()] + ' ' + d.getDate()
 }
 
 function dateKey(d: Date): string {
@@ -34,11 +32,13 @@ function budgetForSeed(seed: string): number {
   return 50 + ((hash >>> 0) % 11) * 10
 }
 
-function getRarity(amount: number): { label: string; icon: any; tier: string } {
-  if (amount <= 70) return { label: 'STANDARD', icon: faStar, tier: 'standard' }
-  if (amount <= 110) return { label: 'GREAT', icon: faBolt, tier: 'great' }
-  if (amount <= 140) return { label: 'ULTRA', icon: faFire, tier: 'ultra' }
-  return { label: 'LEGENDARY', icon: faGem, tier: 'legendary' }
+type RarityTier = 'standard' | 'great' | 'ultra' | 'legendary'
+
+function getRarity(amount: number): { label: string; icon: 'star' | 'bolt' | 'fire' | 'gem'; tier: RarityTier } {
+  if (amount <= 70) return { label: 'STANDARD', icon: 'star', tier: 'standard' }
+  if (amount <= 110) return { label: 'GREAT', icon: 'bolt', tier: 'great' }
+  if (amount <= 140) return { label: 'ULTRA', icon: 'fire', tier: 'ultra' }
+  return { label: 'LEGENDARY', icon: 'gem', tier: 'legendary' }
 }
 
 export function BudgetTicket() {
@@ -83,93 +83,75 @@ export function BudgetTicket() {
 
   return (
     <section className="relative" aria-label="Today's budget challenge ticket">
-      <div className={'game-card ' + (phase === 'done' ? 'rarity-' + rarity.tier : '')}>
+      <div className="pixel-panel" style={{ paddingTop: '24px' }}>
         <div className="flex items-center justify-center gap-2 mb-2">
-          <span className="pokeball pokeball-sm" aria-hidden="true" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">
-            DAILY DROP #{ticketNumber.split('-')[1]}
+          <PixelIcon name="coin" size={14} className="text-amber" />
+          <span className="font-pixel text-[13px] text-muted uppercase tracking-wider">
+            Entry #{ticketNumber.split('-')[1]}
           </span>
         </div>
-
-        <div className="ticket-perf mb-3" />
-
-        <p className="text-center text-[9px] font-bold uppercase tracking-[0.16em] text-white/40 mb-3">
+        <hr className="pixel-divider" />
+        <p className="text-center font-pixel text-[13px] text-faint uppercase tracking-wider mb-4">
           {formatTicketDate(now)}
         </p>
-
         <div className="relative">
           <ScratchPanel amount={amount} phase={phase} onScratch={scratch}>
-            <div className={'revealed-card ' + (rarity.tier === 'legendary' ? 'legendary' : '')}>
-              <div className={'rarity-badge ' + rarity.tier}>
-                <FontAwesomeIcon icon={rarity.icon} className="mr-1" />
-                {rarity.label}
+            <div className="text-center" style={{ padding: '12px 0' }}>
+              <div className="mb-2 flex items-center justify-center gap-1.5">
+                <PixelIcon name={rarity.icon} size={14} className="text-amber" />
+                <span className="font-pixel text-[14px] text-amber uppercase tracking-wider">
+                  {rarity.label}
+                </span>
               </div>
-
-              <div className="mt-3 revealed-amount">
-                <span className="amount-currency">{'\u20B1'}</span>
-                <span className="amount-value">{amount}</span>
+              <div className="amount-display lg">
+                <span className="amount-currency">P</span>
+                <span>{amount}</span>
               </div>
-
-              <p className="amount-label">Today&apos;s Trainers Budget</p>
-              <p className="amount-date">{shortDate(now)}</p>
-
+              <p className="font-pixel text-[14px] text-muted uppercase tracking-wider mt-2">
+                Today's Budget
+              </p>
+              <p className="font-pixel text-[12px] text-faint mt-1">
+                {shortDate(now)}
+              </p>
               {user && profile?.avatar && (
-                <div className="trainer-mini">
-                  <img src={getAvatarUrl(profile.avatar)} alt="" className="trainer-mini-avatar" />
-                  <span>{profile?.display_name || profile?.username || 'Trainer'}</span>
+                <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 pixel-inner">
+                  <img
+                    src={getAvatarUrl(profile.avatar)}
+                    alt=""
+                    className="h-5 w-5"
+                    style={{ border: '1px solid var(--pixel-border-light)', imageRendering: 'auto' }}
+                  />
+                  <span className="font-pixel text-[13px] text-muted">
+                    {profile?.display_name || profile?.username || 'You'}
+                  </span>
                 </div>
-              )}
-
-              {rarity.tier === 'legendary' && (
-                <div className="mt-3 flex justify-center gap-1">
-                  <span className="text-[var(--pokemon-gold)] text-xs">{'\u2605'}</span>
-                  <span className="text-[8px] font-bold uppercase tracking-wider text-[var(--pokemon-gold)]/60">LEGENDARY DROP</span>
-                  <span className="text-[var(--pokemon-gold)] text-xs">{'\u2605'}</span>
-                </div>
-              )}
-
-              {rarity.tier === 'ultra' && (
-                <p className="mt-2 text-[8px] font-bold uppercase tracking-wider text-[var(--pokemon-yellow)]/40">
-                  Ultra Rare
-                </p>
               )}
             </div>
           </ScratchPanel>
-
           {phase === 'idle' && (
-            <p className="text-center text-[9px] uppercase tracking-[0.2em] text-white/30 mt-2">
-              Tap to reveal your daily drop
+            <p className="text-center font-pixel text-[12px] text-faint uppercase tracking-wider mt-2">
+              Tap to reveal
             </p>
           )}
           {phase === 'scratching' && (
-            <p className="text-center text-[9px] uppercase tracking-[0.2em] text-[var(--pokemon-yellow)]/60 mt-2 animate-pulse">
+            <p className="text-center font-pixel text-[12px] text-amber uppercase tracking-wider mt-2">
               Revealing...
             </p>
           )}
         </div>
-
         {phase === 'done' && (
           <div className="mt-3 flex justify-center">
-            <button type="button" onClick={scratchAgain} className="game-btn game-btn-ghost game-btn-sm">
-              <FontAwesomeIcon icon={faArrowRotateRight} />
-              Scratch again
+            <button type="button" onClick={scratchAgain} className="pixel-btn pixel-btn-ghost pixel-btn-sm">
+              <PixelIcon name="redo" size={12} /> Try Again
             </button>
           </div>
         )}
-
-        <div className="ticket-perf my-3" />
-
-        <div className="mt-2">
-          <BarcodeStripe seed={dateKey(now)} />
-        </div>
-
-        <p className="text-center text-[8px] font-bold uppercase tracking-[0.12em] text-white/20 mt-2">
-          {'\u20B1'}50-{'\u20B1'}150 Daily Challenge
+        <hr className="pixel-divider" />
+        <p className="text-center font-pixel text-[11px] text-faint uppercase tracking-wider mt-1">
+          P50-P150 Daily Challenge
         </p>
-
         {phase === 'done' && <ConfettiBurst />}
       </div>
-
       <audio ref={audioRef} src="/sounds/reveal.mp3" preload="none" />
     </section>
   )

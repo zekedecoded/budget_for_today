@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUserPlus } from '@fortawesome/free-solid-svg-icons'
+import { PixelIcon } from '../components/PixelIcon'
 import { supabase } from '../lib/supabase'
 import { USERNAME_RE, USERNAME_RULES, usernameToEmail } from '../lib/usernameAuth'
 
@@ -20,9 +19,9 @@ export function Signup() {
       const suggestion = name.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20)
       if (USERNAME_RE.test(suggestion)) {
         setUsername(suggestion)
-        setError('No email needed � you sign up with just a username. How about "' + suggestion + '"? Press Sign Up again to use it.')
+        setError('No email needed! Just use a username. Try "' + suggestion + '"? Hit Sign Up again.')
       } else {
-        setError('No email needed � you sign up with just a username. ' + USERNAME_RULES)
+        setError('No email needed! ' + USERNAME_RULES)
       }
       return
     }
@@ -39,46 +38,46 @@ export function Signup() {
   }
 
   return (
-    <div className="flex min-h-full items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm">
+    <div className="page-container pt-16">
+      <div className="w-full max-w-sm mx-auto">
         <div className="mb-8 text-center">
-          <span className="pokeball pokeball-lg mx-auto mb-3 pokeball-pulse" aria-hidden="true" />
-          <h1 className="text-2xl font-bold uppercase tracking-wider text-white" style={{ fontFamily: 'var(--font-display)' }}>
-            Begin Your Adventure!
-          </h1>
-          <p className="mt-2 text-xs text-white/40">
-            Create a trainer account to join the challenge
+          <h1 className="page-title text-center">Budget for Today</h1>
+          <p className="font-pixel text-[14px] text-muted mt-2">
+            Create an account to join the challenge
           </p>
         </div>
 
         <div className="auth-card">
           {error && (
-            <div className="mb-4 rounded-lg bg-red-900/30 border border-red-500/30 px-3 py-2 text-xs font-semibold text-red-300">
+            <div
+              className="mb-4 px-3 py-2 font-pixel text-[13px]"
+              style={{ color: 'var(--overspend-light)', background: 'rgba(196,91,74,0.1)', border: '2px solid var(--overspend-dim)' }}
+            >
               {error}
             </div>
           )}
 
           <form onSubmit={handleSignup}>
             <div className="mb-4">
-              <label className="game-label">Username</label>
-              <input type="text" required minLength={3} autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="e.g. ezekiel" className="game-input" />
-              <p className="mt-1 text-[10px] text-white/30">No email needed � 3-20 letters, numbers, or underscores.</p>
+              <label className="pixel-label">Username</label>
+              <input type="text" required minLength={3} autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="e.g. ezekiel" className="pixel-input" />
+              <p className="mt-1 font-pixel text-[12px] text-faint">3-20 characters, letters, numbers, or underscores only.</p>
             </div>
 
             <div className="mb-6">
-              <label className="game-label">Password</label>
-              <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="game-input" />
+              <label className="pixel-label">Password</label>
+              <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="pixel-input" />
             </div>
 
-            <button type="submit" disabled={loading} className="game-btn game-btn-yellow w-full mb-4">
-              <FontAwesomeIcon icon={faUserPlus} />
-              {loading ? 'Creating account...' : 'Sign Up'}
+            <button type="submit" disabled={loading} className="pixel-btn pixel-btn-accent w-full mb-4">
+              <PixelIcon name="user-plus" size={14} />
+              {loading ? 'Creating...' : 'Sign Up'}
             </button>
           </form>
 
-          <p className="text-center text-xs text-white/40">
-            Already have an account?{' '}
-            <Link to="/login" className="font-bold text-[var(--pokemon-yellow)] no-underline hover:underline">
+          <p className="text-center font-pixel text-[14px] text-muted">
+              Already have an account?{' '}
+            <Link to="/login" className="font-bold no-underline" style={{ color: 'var(--amber)' }}>
               Login
             </Link>
           </p>

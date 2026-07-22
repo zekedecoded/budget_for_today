@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faRightToBracket } from '@fortawesome/free-solid-svg-icons'
+import { PixelIcon } from '../components/PixelIcon'
 import { supabase } from '../lib/supabase'
 import { loginIdentifierToEmail } from '../lib/usernameAuth'
 
@@ -26,45 +25,45 @@ export function Login() {
   }
 
   return (
-    <div className="flex min-h-full items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm">
+    <div className="page-container pt-16">
+      <div className="w-full max-w-sm mx-auto">
         <div className="mb-8 text-center">
-          <span className="pokeball pokeball-lg mx-auto mb-3 pokeball-pulse" aria-hidden="true" />
-          <h1 className="text-2xl font-bold uppercase tracking-wider text-white" style={{ fontFamily: 'var(--font-display)' }}>
-            Welcome Back, Trainer!
-          </h1>
-          <p className="mt-2 text-xs text-white/40">
-            Login to claim your daily drop
+          <h1 className="page-title text-center">Budget for Today</h1>
+          <p className="font-pixel text-[14px] text-muted mt-2">
+            Login to continue the challenge
           </p>
         </div>
 
         <div className="auth-card">
           {error && (
-            <div className="mb-4 rounded-lg bg-red-900/30 border border-red-500/30 px-3 py-2 text-xs font-semibold text-red-300">
+            <div
+              className="mb-4 px-3 py-2 font-pixel text-[13px]"
+              style={{ color: 'var(--overspend-light)', background: 'rgba(196,91,74,0.1)', border: '2px solid var(--overspend-dim)' }}
+            >
               {error}
             </div>
           )}
 
           <form onSubmit={handleLogin}>
             <div className="mb-4">
-              <label className="game-label">Username</label>
-              <input type="text" required autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} className="game-input" />
+              <label className="pixel-label">Username</label>
+              <input type="text" required autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} className="pixel-input" />
             </div>
 
             <div className="mb-6">
-              <label className="game-label">Password</label>
-              <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="game-input" />
+              <label className="pixel-label">Password</label>
+              <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="pixel-input" />
             </div>
 
-            <button type="submit" disabled={loading} className="game-btn game-btn-primary w-full mb-4">
-              <FontAwesomeIcon icon={faRightToBracket} />
+            <button type="submit" disabled={loading} className="pixel-btn pixel-btn-primary w-full mb-4">
+              <PixelIcon name="login" size={14} />
               {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
 
-          <p className="text-center text-xs text-white/40">
-            No account yet?{' '}
-            <Link to="/signup" className="font-bold text-[var(--pokemon-yellow)] no-underline hover:underline">
+          <p className="text-center font-pixel text-[14px] text-muted">
+            Don't have an account?{' '}
+            <Link to="/signup" className="font-bold no-underline" style={{ color: 'var(--amber)' }}>
               Sign up
             </Link>
           </p>

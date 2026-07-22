@@ -1,26 +1,17 @@
 import { ReceiptPanel } from '../components/ReceiptPanel'
 import { DebtSavingsDisplay } from '../components/DebtSavingsDisplay'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faReceipt } from '@fortawesome/free-solid-svg-icons'
+import { PixelIcon } from '../components/PixelIcon'
 
 export function ReceiptPage() {
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6">
-      <div className="flex flex-col items-center">
-        <div className="daily-drop-header">
-          <FontAwesomeIcon icon={faReceipt} className="text-2xl text-[var(--pokemon-yellow)] mb-2" />
-          <h1 className="daily-drop-title text-lg">Today's Spending</h1>
-          <p className="daily-drop-subtitle">Log your purchases and track your balance</p>
-        </div>
-
-        <div className="w-full max-w-[340px]">
-          <ReceiptPanel />
-        </div>
-
-        <div className="mt-4 w-full max-w-[340px]">
-          <DebtSavingsDisplay />
-        </div>
+    <div className="page-container pt-6">
+      <div className="page-header">
+        <PixelIcon name="receipt" size={20} className="text-amber mb-1" />
+        <h1 className="page-title">Expense Tracker</h1>
+        <p className="page-subtitle">Log your purchases and see what's left</p>
       </div>
+      <div><ReceiptPanel /></div>
+      <div><DebtSavingsDisplay /></div>
     </div>
   )
 }

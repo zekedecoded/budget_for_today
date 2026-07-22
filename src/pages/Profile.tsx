@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheck, faFloppyDisk } from '@fortawesome/free-solid-svg-icons'
+import { PixelIcon } from '../components/PixelIcon'
 import { useAuth } from '../context/AuthContext'
 import { AVATAR_COUNT, getAvatarUrl } from '../lib/avatar'
 
@@ -34,48 +33,69 @@ export function Profile() {
   }
 
   return (
-    <div className="flex min-h-full items-start justify-center px-4 py-12">
-      <div className="w-full max-w-md">
+    <div className="page-container pt-8">
+      <div className="w-full max-w-md mx-auto">
         <div className="mb-8 text-center">
-          <span className="pokeball pokeball-lg mx-auto mb-3 pokeball-pulse" aria-hidden="true" />
-          <h1 className="text-2xl font-bold uppercase tracking-wider text-white" style={{ fontFamily: 'var(--font-display)' }}>
-            Trainer Profile
-          </h1>
-          <p className="mt-2 text-xs text-white/40">
-            Customize your trainer identity
+          <h1 className="page-title text-center">Profile</h1>
+          <p className="font-pixel text-[14px] text-muted mt-2">
+            Customize your character
           </p>
         </div>
 
-        <div className="game-card-solid">
+        <div className="pixel-panel">
           <div className="mb-6 flex justify-center">
             <div className="flex items-center gap-4">
-              <img src={getAvatarUrl(selected || 1)} alt="Selected avatar" className="h-20 w-20 rounded-full border-[3px] border-[var(--pokemon-yellow)] object-cover shadow-lg shadow-yellow-500/20" />
+              <img
+                src={getAvatarUrl(selected || 1)}
+                alt="Selected avatar"
+                className="h-16 w-16 object-cover"
+                style={{ border: '3px solid var(--amber)', imageRendering: 'auto' }}
+              />
               <div>
-                <p className="text-sm font-bold text-white">{displayName || profile?.username || 'Trainer'}</p>
-                <p className="text-[10px] text-white/40">Avatar #{selected || 1}</p>
+                <p className="font-pixel text-[16px] text-primary">{displayName || profile?.username || 'You'}</p>
+                <p className="font-pixel text-[12px] text-muted">Avatar #{selected || 1}</p>
               </div>
             </div>
           </div>
 
           <div className="mb-6">
-            <label className="game-label">Display Name</label>
-            <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder={profile?.username || 'Your display name'} maxLength={30} className="game-input" />
-            <p className="mt-1 text-[10px] text-white/30">Shown on the leaderboard. Leave blank to use your username.</p>
+            <label className="pixel-label">Display Name</label>
+            <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder={profile?.username || 'Your display name'} maxLength={30} className="pixel-input" />
+            <p className="mt-1 font-pixel text-[12px] text-faint">Shown on the leaderboard. You can leave it blank.</p>
           </div>
 
           <div className="mb-4">
-            <p className="game-label mb-3">Choose Your Trainer Icon</p>
+            <p className="pixel-label mb-3">Choose an Avatar</p>
           </div>
-          <div className="grid grid-cols-5 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             {Array.from({ length: AVATAR_COUNT }, (_, i) => i + 1).map((num) => (
-              <button key={num} type="button" onClick={() => setSelected(num)} className={'avatar-option ' + (selected === num ? 'selected' : '')}>
-                <img src={getAvatarUrl(num)} alt={'Avatar ' + num} className="h-12 w-12 rounded-lg object-cover" />
+              <button
+                key={num}
+                type="button"
+                onClick={() => setSelected(num)}
+                className="cursor-pointer p-0.5 transition-all"
+                style={{
+                  border: selected === num ? '3px solid var(--amber)' : '3px solid transparent',
+                  background: 'none',
+                }}
+              >
+                <img
+                  src={getAvatarUrl(num)}
+                  alt={'Avatar ' + num}
+                  className="h-full w-full object-cover"
+                  style={{ imageRendering: 'auto' }}
+                />
               </button>
             ))}
           </div>
 
-          <button type="button" onClick={handleSave} disabled={saving || !dirty} className="game-btn game-btn-yellow w-full mt-6">
-            <FontAwesomeIcon icon={saved ? faCheck : faFloppyDisk} />
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving || !dirty}
+            className="pixel-btn pixel-btn-accent w-full mt-6"
+          >
+            <PixelIcon name={saved ? 'check' : 'save'} size={14} />
             {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
           </button>
         </div>

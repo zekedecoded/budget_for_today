@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrophy, faUser, faCrown } from '@fortawesome/free-solid-svg-icons'
+import { PixelIcon } from './PixelIcon'
 import { supabase } from '../lib/supabase'
 import { getAvatarUrl } from '../lib/avatar'
 import type { DailyLimit } from '../types'
@@ -40,58 +39,66 @@ export function DailyLimitsBoard() {
   const sorted = [...limits].sort((a, b) => b.amount - a.amount)
 
   return (
-    <div className="game-card-solid">
-      <div className="flex items-center gap-2 mb-5">
-        <FontAwesomeIcon icon={faTrophy} className="text-[var(--pokemon-yellow)] text-sm" />
-        <h2 className="text-sm font-bold uppercase tracking-wider text-white/90" style={{ fontFamily: 'var(--font-body)' }}>
-          Today&apos;s Trainers
+    <div className="pixel-panel mt-4">
+      <div className="flex items-center gap-2 mb-4">
+        <PixelIcon name="trophy" size={16} className="text-amber" />
+        <h2 className="font-pixel text-[16px] text-primary uppercase tracking-wider">
+          Today's Board
         </h2>
-        <span className="status-pill ml-auto">{limits.length}</span>
+        <span className="ml-auto font-pixel text-[12px] text-faint">{limits.length}</span>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-8">
-          <span className="pokeball-loader" />
+          <span className="font-pixel text-[16px] text-faint">Loading...</span>
         </div>
       ) : sorted.length === 0 ? (
         <div className="text-center py-8">
-          <span className="pokeball mx-auto mb-3 opacity-30" aria-hidden="true" />
-          <p className="text-xs text-white/40">No trainers have scratched yet today.</p>
-          <p className="text-[10px] text-white/20 mt-1">Be the first to claim your daily drop!</p>
+          <p className="font-pixel text-[14px] text-muted">No one has opened their budget yet.</p>
+          <p className="font-pixel text-[12px] text-faint mt-1">You go first!</p>
         </div>
       ) : (
-        <ul className="space-y-2">
+        <div>
           {sorted.map((l, i) => {
             const rank = i + 1
             const isTop3 = rank <= 3
             return (
-              <li key={l.id} className={'leaderboard-row flex items-center justify-between rounded-xl border border-white/5 px-3 py-2.5 ' + (isTop3 ? 'bg-white/[0.03]' : 'bg-white/[0.02]')}>
-                <div className="flex items-center gap-2.5 min-w-0">
+              <div
+                key={l.id}
+                className={`ranking-row ${isTop3 ? 'top' + rank : ''}`}
+              >
+                <div className="flex items-center gap-2 min-w-0 flex-1">
                   {isTop3 ? (
-                    <span className={'rank-badge rank-' + rank}>
-                      {rank === 1 ? <FontAwesomeIcon icon={faCrown} className="text-xs" /> : rank}
+                    <span className={`rank-badge ${rank === 1 ? 'gold' : rank === 2 ? 'silver' : 'bronze'}`}>
+                      {rank === 1 ? <PixelIcon name="crown" size={14} /> : rank}
                     </span>
                   ) : (
-                    <span className="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold text-white/30 bg-white/5 flex-shrink-0">
-                      {rank}
-                    </span>
+                    <span className="rank-badge text-faint">{rank}</span>
                   )}
                   {l.profiles?.avatar ? (
-                    <img src={getAvatarUrl(l.profiles.avatar)} alt="" className="h-7 w-7 rounded-full border border-white/10 object-cover flex-shrink-0" />
+                    <img
+                      src={getAvatarUrl(l.profiles.avatar)}
+                      alt=""
+                      className="h-6 w-6 object-cover flex-shrink-0"
+                      style={{ border: '2px solid var(--pixel-border-light)', imageRendering: 'auto' }}
+                    />
                   ) : (
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/5 text-[10px] text-white/20 flex-shrink-0">
-                      <FontAwesomeIcon icon={faUser} />
+                    <span
+                      className="flex h-6 w-6 items-center justify-center text-faint flex-shrink-0"
+                      style={{ border: '2px solid var(--pixel-border-light)', background: 'rgba(0,0,0,0.1)' }}
+                    >
+                      <PixelIcon name="user" size={10} />
                     </span>
                   )}
-                  <span className="text-sm font-bold text-white/80 truncate">{displayName(l)}</span>
+                  <span className="font-pixel text-[14px] text-primary truncate">{displayName(l)}</span>
                 </div>
-                <span className="text-lg font-bold text-[var(--pokemon-yellow)] flex-shrink-0 ml-2" style={{ fontFamily: 'var(--font-amount)' }}>
-                  {'\u20B1'}{l.amount}
+                <span className="font-pixel text-[16px] text-muted flex-shrink-0 ml-2">
+                  P{l.amount}
                 </span>
-              </li>
+              </div>
             )
           })}
-        </ul>
+        </div>
       )}
     </div>
   )
